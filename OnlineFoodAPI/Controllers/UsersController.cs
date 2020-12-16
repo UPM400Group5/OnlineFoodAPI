@@ -81,6 +81,7 @@ namespace OnlineFoodAPI.Controllers
         }
 
         // POST: api/Users
+        [HttpPost]
         [ResponseType(typeof(User))]
         public IHttpActionResult PostUser(User user)
         {
@@ -99,6 +100,29 @@ namespace OnlineFoodAPI.Controllers
             db.SaveChanges();
 
             return CreatedAtRoute("DefaultApi", new { id = user.id }, user);
+        }
+        
+        [Route("Users/addfavrest/{userid}/{restid}")]
+        public string AddFavRest(int userid, int restid)
+        {
+            User user = db.User.Find(userid);
+            var Restaurant = db.Restaurant.Find(restid);
+            FavoritesRestaurants favoritesRestaurant = new FavoritesRestaurants();
+            favoritesRestaurant.Restaurant_id = Restaurant.id;
+            favoritesRestaurant.User_id = user.id;
+
+            try
+            {
+                db.FavoritesRestaurants.Add(favoritesRestaurant);
+                db.SaveChanges();
+                return "Success";
+            }
+            catch(Exception e)
+            {
+                return "exception " + e;
+            }
+
+
         }
 
         // DELETE: api/Users/5
@@ -130,5 +154,7 @@ namespace OnlineFoodAPI.Controllers
         {
             return db.User.Count(e => e.id == id) > 0;
         }
+
+        
     }
 }

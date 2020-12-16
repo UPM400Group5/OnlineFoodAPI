@@ -1,3 +1,4 @@
+using OnlineFoodAPI.Models;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
@@ -16,9 +17,26 @@ namespace OnlineFoodAPI
         public virtual DbSet<Ingredient> Ingredient { get; set; }
         public virtual DbSet<Restaurant> Restaurant { get; set; }
         public virtual DbSet<User> User { get; set; }
+        public DbSet<FavoritesRestaurants> FavoritesRestaurants { get;set;}
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<FavoritesRestaurants>()
+                .HasKey(k => new { k.Restaurant_id, k.User_id })
+                .ToTable("FavoritesRestaurants");
+
+
+            /*modelBuilder.Entity<FavoritesRestaurants>()
+                .HasRequired(e => e.Restaurant)
+                .WithMany()
+                .HasForeignKey(c => c.Restaurant_id);
+
+            modelBuilder.Entity<FavoritesRestaurants>()
+                .HasRequired(e => e.User)
+                .WithMany()
+                .HasForeignKey(c => c.User_id); */
+
+
             modelBuilder.Entity<Dishes>()
                 .Property(e => e.name)
                 .IsUnicode(false);
@@ -55,10 +73,10 @@ namespace OnlineFoodAPI
                 .HasForeignKey(e => e.Restaurant_id)
                 .WillCascadeOnDelete(false);
 
-            modelBuilder.Entity<Restaurant>()
+            /*modelBuilder.Entity<Restaurant>()
                 .HasMany(e => e.User)
                 .WithMany(e => e.Restaurant)
-                .Map(m => m.ToTable("FavoritesRestaurants"));
+                .Map(m => m.ToTable("FavoritesRestaurants")); */
 
             modelBuilder.Entity<User>()
                 .Property(e => e.role)
@@ -87,6 +105,8 @@ namespace OnlineFoodAPI
             modelBuilder.Entity<User>()
                 .Property(e => e.city)
                 .IsUnicode(false);
+
+           
         }
     }
 }
