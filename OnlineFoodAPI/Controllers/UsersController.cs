@@ -55,7 +55,7 @@ namespace OnlineFoodAPI.Controllers
             // If password length is less than 6, dont continue
             if (user.password.Length < 6) 
             {
-                //TODO: error message kanske?
+                //TODO: annat meddelande?
                 return BadRequest();
             }
 
@@ -87,6 +87,12 @@ namespace OnlineFoodAPI.Controllers
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+
+            if (user.password.Length < 6)
+            {
+                //TODO: annat meddelande?
+                return BadRequest();
             }
 
             db.User.Add(user);
