@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
 using OnlineFoodAPI;
+using OnlineFoodAPI.Models;
 
 namespace OnlineFoodAPI.Controllers
 {
@@ -16,10 +17,28 @@ namespace OnlineFoodAPI.Controllers
     {
         private DatabaseFoodOnlineEntityModel db = new DatabaseFoodOnlineEntityModel();
 
-        // GET: api/Users
-        public IQueryable<User> GetUser()
+        // Returns all attributes of user except password
+        public List<UserAPIModel> GetUser(string sort)
         {
-            return db.User;
+            List<UserAPIModel> userApiList = new List<UserAPIModel>();
+
+            foreach (var item in (db.User))
+            {
+                // Create new object each loop
+                UserAPIModel temp = new UserAPIModel();
+
+                temp.adress = item.adress;
+                temp.city = item.city;
+                temp.email = item.email;
+                temp.id = item.id;
+                temp.phone = item.phone;
+                temp.role = item.role;
+                temp.username = item.username;
+
+                // add the object to the list
+                userApiList.Add(temp);
+            }
+            return userApiList;
         }
 
         // GET: api/Users/5
@@ -39,6 +58,8 @@ namespace OnlineFoodAPI.Controllers
         [ResponseType(typeof(void))]
         public IHttpActionResult PutUser(int id, User user)
         {
+            user = db.User.Find(id);
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -46,6 +67,13 @@ namespace OnlineFoodAPI.Controllers
 
             if (id != user.id)
             {
+                return BadRequest();
+            }
+
+            // If password length is less than 6, dont continue
+            if (user.password.Length < 6) 
+            {
+                //TODO: error message kanske?
                 return BadRequest();
             }
 
