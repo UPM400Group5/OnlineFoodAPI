@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
 using OnlineFoodAPI;
+using OnlineFoodAPI.Models;
 
 namespace OnlineFoodAPI.Controllers
 {
@@ -16,13 +17,16 @@ namespace OnlineFoodAPI.Controllers
     {
         private DatabaseFoodOnlineEntityModel db = new DatabaseFoodOnlineEntityModel();
 
-        // GET: api/Dishes
+        [HttpGet]
+        // attribute routing
+        [Route("dishes/alldishes")]
         public IQueryable<Dishes> GetDishes()
         {
             return db.Dishes;
         }
 
-        // GET: api/Dishes/5
+        [Route("dishes/getspecificdish/{id}")]
+        // GET: specificDish by sending id
         [ResponseType(typeof(Dishes))]
         public IHttpActionResult GetDishes(int id)
         {
@@ -34,85 +38,87 @@ namespace OnlineFoodAPI.Controllers
 
             return Ok(dishes);
         }
+       
+
 
         // PUT: api/Dishes/5
         [ResponseType(typeof(void))]
-        public IHttpActionResult PutDishes(int id, Dishes dishes)
+    public IHttpActionResult PutDishes(int id, Dishes dishes)
+    {
+        if (!ModelState.IsValid)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            if (id != dishes.id)
-            {
-                return BadRequest();
-            }
-
-            db.Entry(dishes).State = EntityState.Modified;
-
-            try
-            {
-                db.SaveChanges();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DishesExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return StatusCode(HttpStatusCode.NoContent);
+            return BadRequest(ModelState);
         }
 
-        // POST: api/Dishes
-        [ResponseType(typeof(Dishes))]
-        public IHttpActionResult PostDishes(Dishes dishes)
+        if (id != dishes.id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            return BadRequest();
+        }
 
-            db.Dishes.Add(dishes);
+        db.Entry(dishes).State = EntityState.Modified;
+
+        try
+        {
             db.SaveChanges();
-
-            return CreatedAtRoute("DefaultApi", new { id = dishes.id }, dishes);
         }
-
-        // DELETE: api/Dishes/5
-        [ResponseType(typeof(Dishes))]
-        public IHttpActionResult DeleteDishes(int id)
+        catch (DbUpdateConcurrencyException)
         {
-            Dishes dishes = db.Dishes.Find(id);
-            if (dishes == null)
+            if (!DishesExists(id))
             {
                 return NotFound();
             }
-
-            db.Dishes.Remove(dishes);
-            db.SaveChanges();
-
-            return Ok(dishes);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
+            else
             {
-                db.Dispose();
+                throw;
             }
-            base.Dispose(disposing);
         }
 
-        private bool DishesExists(int id)
-        {
-            return db.Dishes.Count(e => e.id == id) > 0;
-        }
+        return StatusCode(HttpStatusCode.NoContent);
     }
+
+    // POST: api/Dishes
+    [ResponseType(typeof(Dishes))]
+    public IHttpActionResult PostDishes(Dishes dishes)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        db.Dishes.Add(dishes);
+        db.SaveChanges();
+
+        return CreatedAtRoute("DefaultApi", new { id = dishes.id }, dishes);
+    }
+
+    // DELETE: api/Dishes/5
+    [ResponseType(typeof(Dishes))]
+    public IHttpActionResult DeleteDishes(int id)
+    {
+        Dishes dishes = db.Dishes.Find(id);
+        if (dishes == null)
+        {
+            return NotFound();
+        }
+
+        db.Dishes.Remove(dishes);
+        db.SaveChanges();
+
+        return Ok(dishes);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            db.Dispose();
+        }
+        base.Dispose(disposing);
+    }
+
+    private bool DishesExists(int id)
+    {
+        return db.Dishes.Count(e => e.id == id) > 0;
+    }
+}
 }

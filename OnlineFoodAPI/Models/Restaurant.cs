@@ -1,5 +1,6 @@
 namespace OnlineFoodAPI
 {
+    using OnlineFoodAPI.Models;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
@@ -37,5 +38,7 @@ namespace OnlineFoodAPI
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<User> User { get; set; }
+        public IList<FavoritesRestaurants> FavoritesRestaurants { get; set; }
+
     }
 }

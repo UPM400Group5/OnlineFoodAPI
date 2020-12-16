@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
 using OnlineFoodAPI;
+using OnlineFoodAPI.Models;
 
 namespace OnlineFoodAPI.Controllers
 {
@@ -16,6 +17,7 @@ namespace OnlineFoodAPI.Controllers
     {
         private DatabaseFoodOnlineEntityModel db = new DatabaseFoodOnlineEntityModel();
 
+        [HttpGet]
         // GET: api/Restaurants
         public IQueryable<Restaurant> GetRestaurant()
         {
@@ -33,6 +35,37 @@ namespace OnlineFoodAPI.Controllers
             }
 
             return Ok(restaurant);
+        }
+
+        [Route("restaurant/getfavrest/{userid}")]
+        // GET: all favourite dishes by sending userid
+        public List<Restaurant> GetFavouriteRestaurant(int userid)
+        {
+            List<Restaurant> temprestaurants = new List<Restaurant>();
+            List<Restaurant> restaurants = new List<Restaurant>();
+            List<FavoritesRestaurants> FavoriteRestaurants = db.FavoritesRestaurants.Where(uid => uid.User_id == userid).ToList();
+            if (FavoriteRestaurants.Count != 0)
+            {
+                foreach (var item in FavoriteRestaurants)
+                {
+                    Restaurant restaurant = new Restaurant();
+                    temprestaurants.Add(db.Restaurant.Where(fr => fr.id == item.Restaurant_id).FirstOrDefault());
+                }
+            }
+            foreach(var item in temprestaurants)
+            {
+                Restaurant restaurant = new Restaurant();
+                restaurant.id = item.id;
+                restaurant.name = item.name;
+                restaurant.adress = item.adress;
+                restaurant.city = item.city;
+                restaurant.delivery_price = item.delivery_price;
+                restaurant.Dishes= item.Dishes;
+                restaurants.Add(restaurant);
+
+
+            }
+            return restaurants;
         }
 
         // PUT: api/Restaurants/5
@@ -70,9 +103,10 @@ namespace OnlineFoodAPI.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // POST: api/Restaurants
+        [HttpPost] 
+        [Route("restaurant/new")]
         [ResponseType(typeof(Restaurant))]
-        public IHttpActionResult PostRestaurant(Restaurant restaurant)
+        public IHttpActionResult PostRestaurant(Restaurant restaurant) //works but should send an affirmative if the action goes through instead of error on postman?
         {
             if (!ModelState.IsValid)
             {
@@ -84,6 +118,7 @@ namespace OnlineFoodAPI.Controllers
 
             return CreatedAtRoute("DefaultApi", new { id = restaurant.id }, restaurant);
         }
+
 
         // DELETE: api/Restaurants/5
         [ResponseType(typeof(Restaurant))]
