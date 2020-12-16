@@ -17,28 +17,10 @@ namespace OnlineFoodAPI.Controllers
     {
         private DatabaseFoodOnlineEntityModel db = new DatabaseFoodOnlineEntityModel();
 
-        // Returns all attributes of user except password
-        public List<UserAPIModel> GetUser(string sort)
+        // get: api/Users
+        public IQueryable<User> GetUser()
         {
-            List<UserAPIModel> userApiList = new List<UserAPIModel>();
-
-            foreach (var item in (db.User))
-            {
-                // Create new object each loop
-                UserAPIModel temp = new UserAPIModel();
-
-                temp.adress = item.adress;
-                temp.city = item.city;
-                temp.email = item.email;
-                temp.id = item.id;
-                temp.phone = item.phone;
-                temp.role = item.role;
-                temp.username = item.username;
-
-                // add the object to the list
-                userApiList.Add(temp);
-            }
-            return userApiList;
+            return db.User;
         }
 
         // GET: api/Users/5
