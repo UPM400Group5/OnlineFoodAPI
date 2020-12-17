@@ -13,6 +13,11 @@ namespace OnlineFoodAPI.Controllers
     {
         [HttpPost]
         [Route("Login")]
+        /// <summary>
+        /// Compares username and password. If both matches someone in the database an object will be returned.
+        /// </summary>
+        /// <param name="username">Username</param>
+        /// <param name="password">The password</param>
         public UserModel LoginUser(LoginModel loginDetails) 
         {
             try
@@ -30,10 +35,15 @@ namespace OnlineFoodAPI.Controllers
                     }
                 }
             }
-            catch {  }
+            catch (Exception e)
+            {
+               
+            }
 
             // Return null if invalid or failed
             return null;
+      
+
         }
     }
 }

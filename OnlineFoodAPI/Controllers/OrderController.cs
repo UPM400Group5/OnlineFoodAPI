@@ -14,7 +14,7 @@ namespace OnlineFoodAPI.Controllers
         [Route("Order")]
 
         // Accept dishes list and userId
-        public ReceiptModel LoginUser(OrderModel orderDetails)
+        public ReceiptModel Order(OrderModel orderDetails)
         {
             int sum = 0;
             ReceiptModel receipt; 

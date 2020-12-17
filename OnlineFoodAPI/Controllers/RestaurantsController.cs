@@ -121,6 +121,11 @@ namespace OnlineFoodAPI.Controllers
             return CreatedAtRoute("DefaultApi", new { id = restaurant.id }, restaurant);
         }
 
+        /// <summary>
+        /// Get all restaurants from a city
+        /// </summary>
+        /// <param name="city">Name of city</param>
+        /// <returns>Restaurants</returns>
         [HttpGet]
         [Route("restaurant/sort/{city}")]
         public List<Restaurant> GetSortedCity(string city)
@@ -142,6 +147,49 @@ namespace OnlineFoodAPI.Controllers
             }
 
             return restaurantsList;
+        }
+
+        /// <summary>
+        /// Get list of dishes from a restaurant by id
+        /// </summary>
+        /// <param name="id">Id of restaurant</param>
+        /// <returns>Dishes</returns>
+        [HttpGet]
+        [Route("restaurant/dishes/{id}")]
+        public List<Dishes> GetRestaurantDishes(int id)
+        {
+            List<Dishes> dishesList = new List<Dishes>();
+            var dishes = db.Dishes.Where(x => x.Restaurant_id == id).ToList();
+
+            // It must be looped and certain objects must be removed, otherwise API sends error
+            foreach (var item in dishes)
+            {
+                Dishes temp = new Dishes();
+
+                temp.id = item.id;
+                temp.price = item.price;
+                temp.specialprice = item.specialprice;
+                temp.name = item.name;
+                temp.Restaurant_id = item.Restaurant_id;
+
+                //TODO: kolla igenom senare om bättre metod finns... kanske
+                //There is error if one of these fails.Continue even if these values are null...
+                //try { temp.Ingredient = item.Ingredient; }
+                //catch { temp.Ingredient = null; }
+                //try { temp.User = item.User; }
+                //catch { temp.User = null; }
+                //try 
+                //{ 
+                //    // assign the restaurant to the object. Assign null if fails
+                //    temp.Restaurant = db.Restaurant.Find(temp.Restaurant_id);
+                //}
+                //catch { temp.Restaurant = null; }
+
+
+                dishesList.Add(temp);
+            }
+
+            return dishesList;
         }
 
 
