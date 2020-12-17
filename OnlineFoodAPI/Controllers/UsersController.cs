@@ -82,6 +82,7 @@ namespace OnlineFoodAPI.Controllers
 
         // POST: api/Users
         [HttpPost]
+
         [ResponseType(typeof(User))]
         public IHttpActionResult PostUser(User user)
         {
@@ -101,7 +102,9 @@ namespace OnlineFoodAPI.Controllers
 
             return CreatedAtRoute("DefaultApi", new { id = user.id }, user);
         }
-        
+
+        #region FAVOURITE RESTAURANTS
+        [HttpGet]
         [Route("Users/addfavrest/{userid}/{restid}")]
         public string AddFavRest(int userid, int restid)
         {
@@ -119,11 +122,43 @@ namespace OnlineFoodAPI.Controllers
             }
             catch(Exception e)
             {
-                return "exception " + e;
+                return "exception " + e.Message;
             }
 
 
         }
+
+        [HttpDelete]
+        [Route("Users/Removefavrest/{userid}/{restid}")]   //Removes favrestauarant - Tested and works
+        public string RemoveFavRest(int userid, int restid)
+        {
+            User user = db.User.Find(userid);
+            var Restaurant = db.Restaurant.Find(restid);
+            if (Restaurant == null)
+            {
+                return "could not find the restaurant";
+            }
+            FavoritesRestaurants favoritesRestaurant = new FavoritesRestaurants();
+            favoritesRestaurant.Restaurant_id = Restaurant.id;
+            favoritesRestaurant.User_id = user.id;
+
+            try
+            {
+                db.FavoritesRestaurants.Attach(favoritesRestaurant);
+                db.Entry(favoritesRestaurant).State = EntityState.Deleted;
+                db.SaveChanges();
+                return "Success";
+            }
+            catch (Exception e)
+            {
+                return "exception " + e.Message;
+            }
+
+
+        }
+
+        #endregion
+
 
         // DELETE: api/Users/5
         [ResponseType(typeof(User))]
