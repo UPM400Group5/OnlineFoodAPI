@@ -17,7 +17,7 @@ namespace OnlineFoodAPI.Models
 
         public int Restaurant_id { get; set; }
 
-        public virtual Restaurant Restaurant { get; set; }
+        public  Restaurant Restaurant { get; set; }
 
 
     }

@@ -20,9 +20,27 @@ namespace OnlineFoodAPI.Controllers
         [HttpGet]
         // attribute routing
         [Route("dishes/alldishes")]
-        public IQueryable<Dishes> GetDishes()
+        public List<Dishes> GetDishes()
         {
-            return db.Dishes;
+            List<Dishes> alldishes = db.Dishes.ToList();
+            try{
+                foreach (var item in alldishes)
+                {
+                    List<Ingredient> temping = new List<Ingredient>();
+                    List<DishesIngredient> ingredientlist = db.DishesIngredient.Where(e => e.Dishes_id == item.id).ToList();
+                    foreach (var item2 in ingredientlist)
+                    {
+                        temping.Add(db.Ingredient.Find(item2.Ingredient_id));
+                    }
+                    item.Ingredient = temping;
+                }
+            }
+            catch (Exception e)
+            {
+                
+            }
+            
+            return alldishes;
         }
 
         [Route("dishes/getspecificdish/{id}")]
@@ -127,12 +145,60 @@ namespace OnlineFoodAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
+            foreach (var item in dishes.Ingredient)
+            {
+                Ingredient tempingre = db.Ingredient.Where(e => e.name == item.name).FirstOrDefault();
+                item.id = tempingre.id;
+            }
+            Dishes tempdish1 = new Dishes();
+            tempdish1.name = dishes.name;
+            tempdish1.price = dishes.price;
+            if(dishes.specialprice != null || dishes.specialprice == 0)
+            {
+                tempdish1.specialprice = dishes.specialprice;
+            }
+            tempdish1.Restaurant_id = dishes.Restaurant_id;
+            
 
-            db.Dishes.Add(dishes);
+            db.Dishes.Add(tempdish1);
             db.SaveChanges();
 
+            
+            Dishes tempdish = db.Dishes.Where(e => e.name == dishes.name).FirstOrDefault();
+            dishes.id = tempdish.id;
+            foreach (var item in dishes.Ingredient)
+            {
+                DishesIngredient tempdishing = new DishesIngredient();
+                tempdishing.Ingredient_id = item.id;
+                tempdishing.Dishes_id = dishes.id;
+                List<DishesIngredient> checkifexistlist = db.DishesIngredient.Where(e => e.Dishes_id == tempdishing.Dishes_id).ToList();
+                List<int> tempIngredientID = new List<int>();
+                bool addtodb = true;
+                foreach(var item2 in checkifexistlist)
+                {
+                    if (tempIngredientID.Any(x=> x.Equals(item2.Ingredient_id)))
+                    {
+                        addtodb = false; //so that the db doesnt update if there already is an ingrediant that exist to the current dish_id
+                    }
+                }
+                if (addtodb) //continue if there is no overlapping of ingredients. 
+                {
+                    try
+                    {
+                        db.DishesIngredient.Add(tempdishing);
+                        db.SaveChanges();
+                    }
+                    catch (Exception e)
+                    {
+                        return BadRequest("Could not save to table dishesingredient | " + e);
+                    }
+                }
+
+            }
             return CreatedAtRoute("DefaultApi", new { id = dishes.id }, dishes);
         }
+
+       
 
         [Route("dishes/delete/{dishid}/{userid}")]  //TODO test
         [ResponseType(typeof(Dishes))]
@@ -149,6 +215,13 @@ namespace OnlineFoodAPI.Controllers
                 return NotFound();
             }
 
+            DishesIngredient tempdishing = db.DishesIngredient.Where(e => e.Dishes_id == dishid).FirstOrDefault();
+            if(tempdishing != null)
+            {
+                db.DishesIngredient.Remove(tempdishing);
+                db.SaveChanges();
+            }
+           
             db.Dishes.Remove(dishes);
             db.SaveChanges();
 

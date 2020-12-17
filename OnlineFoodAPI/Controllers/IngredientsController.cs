@@ -42,7 +42,7 @@ namespace OnlineFoodAPI.Controllers
         public IHttpActionResult PutIngredient(int id, Ingredient ingredient, int userid)
         {
             User checkifadmin = db.User.Find(userid);
-            if (checkifadmin.role != "admin")
+            if (checkifadmin.role.ToLower() != "admin")
             {
                 return BadRequest("User is not a admin");
             }
@@ -55,9 +55,13 @@ namespace OnlineFoodAPI.Controllers
             {
                 return BadRequest();
             }
+            Ingredient temping = db.Ingredient.Where(e => e.name == ingredient.name).FirstOrDefault();
+            if(temping == null)
+            {
+                return BadRequest("That ingredient already exists");
+            }
 
             db.Entry(ingredient).State = EntityState.Modified;
-
             try
             {
                 db.SaveChanges();
@@ -77,25 +81,33 @@ namespace OnlineFoodAPI.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // POST: api/Ingredients
+        [HttpPost]
+        [Route("ingredients/newingredient")]
         [ResponseType(typeof(Ingredient))]
-        public IHttpActionResult PostIngredient(Ingredient ingredient)
+        public string PostIngredient(Ingredient ingredient)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return "invalid model";
             }
 
             db.Ingredient.Add(ingredient);
             db.SaveChanges();
 
-            return CreatedAtRoute("DefaultApi", new { id = ingredient.id }, ingredient);
+            return "succesfully created " + ingredient.name;
         }
 
+        [HttpDelete]
+        [Route("ingredient/delete/{id}/{userid}")]
         // DELETE: api/Ingredients/5
         [ResponseType(typeof(Ingredient))]
-        public IHttpActionResult DeleteIngredient(int id)
+        public IHttpActionResult DeleteIngredient(int id, int userid)
         {
+            User checkifadmin = db.User.Find(userid);
+            if (checkifadmin.role.ToLower() != "admin")
+            {
+                return BadRequest("User is not a admin");
+            }
             Ingredient ingredient = db.Ingredient.Find(id);
             if (ingredient == null)
             {

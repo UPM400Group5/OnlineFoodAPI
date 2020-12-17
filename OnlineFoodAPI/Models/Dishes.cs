@@ -1,5 +1,6 @@
 namespace OnlineFoodAPI
 {
+using OnlineFoodAPI.Models;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
@@ -21,17 +22,20 @@ namespace OnlineFoodAPI
         [StringLength(50)]
         public string name { get; set; }
 
+        [ForeignKey("Restaurant")]
         public int Restaurant_id { get; set; }
 
         public int price { get; set; }
         public int? specialprice { get; set; }
 
-        public virtual Restaurant Restaurant { get; set; }
+        public  Restaurant Restaurant { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Ingredient> Ingredient { get; set; }
+        public ICollection<Ingredient> Ingredient { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<User> User { get; set; }
+        public  ICollection<User> User { get; set; }
+        public  IList<DishesIngredient> DishesIngredient { get; set; }
+
     }
 }

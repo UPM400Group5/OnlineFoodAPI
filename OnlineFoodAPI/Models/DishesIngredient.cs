@@ -15,7 +15,7 @@ namespace OnlineFoodAPI.Models
 
         [ForeignKey("Ingredient")]
         public int Ingredient_id { get; set; }
-        public virtual Ingredient Ingredient { get; set; }
+        public Ingredient Ingredient { get; set; }
     }
 
 }

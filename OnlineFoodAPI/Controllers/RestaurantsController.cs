@@ -62,7 +62,7 @@ namespace OnlineFoodAPI.Controllers
                 restaurant.adress = item.adress;
                 restaurant.city = item.city;
                 restaurant.delivery_price = item.delivery_price;
-                restaurant.Dishes= item.Dishes;
+                // restaurant.Dishes= item.Dishes;
                 restaurants.Add(restaurant);
 
 

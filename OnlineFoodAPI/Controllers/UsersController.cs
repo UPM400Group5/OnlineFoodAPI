@@ -20,6 +20,9 @@ namespace OnlineFoodAPI.Controllers
         // get: api/Users
         [HttpGet]
         [Route("Users/All/{id}")]
+        /// <summary>
+        /// Get all data from users, send in current userID. Should only be allowed as admin
+        /// </summary>
         [ResponseType(typeof(List<UserModel>))]
         public List<UserModel> GetAllUsers(int id)
         {
@@ -175,6 +178,8 @@ namespace OnlineFoodAPI.Controllers
 
 
         }
+
+
 
         #endregion
 
