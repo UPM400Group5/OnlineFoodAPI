@@ -23,26 +23,91 @@ namespace OnlineFoodAPI.Controllers
         public List<Dishes> GetDishes()
         {
             List<Dishes> alldishes = db.Dishes.ToList();
-            try{
+            try
+            {
                 foreach (var item in alldishes)
                 {
                     List<Ingredient> temping = new List<Ingredient>();
                     List<DishesIngredient> ingredientlist = db.DishesIngredient.Where(e => e.Dishes_id == item.id).ToList();
                     foreach (var item2 in ingredientlist)
                     {
-                        temping.Add(db.Ingredient.Find(item2.Ingredient_id));
+                        Ingredient ingridienttemp = db.Ingredient.Find(item2.Ingredient_id);
+                        ingridienttemp.Dishes = null;
+                        ingridienttemp.DishesIngredient = null;
+                        temping.Add(ingridienttemp);
                     }
                     item.Ingredient = temping;
+                    item.DishesIngredient = null;
                 }
             }
-            catch (Exception e)
-            {
-                
-            }
-            
+            catch (Exception e){}
             return alldishes;
         }
 
+
+        [HttpPut]
+        [Route("dishes/update/{id}/{userid}")]
+        public string PutDishess(int id, int userid, Dishes dishes)
+        {
+            User checkifadmin = db.User.Find(userid);
+            if (checkifadmin.role != "admin")
+            {
+                return "User is not a admin";
+            } 
+            if (id != dishes.id)
+            {
+                return "id doesnt extist";
+            }
+            if (dishes.specialprice == null || dishes.specialprice == 0) //Checks if price is changed after specialprice is
+            {
+                Dishes dish = db.Dishes.Find(dishes.id);
+                if (dishes.price != dish.price)
+                {
+                    return "Remove specialprice before changing normal price";
+                }
+            }
+            try
+            {
+                DishesIngredient tempdishing = db.DishesIngredient.Where(e => e.Dishes_id == dishes.id).FirstOrDefault();
+                db.DishesIngredient.Attach(tempdishing);
+                db.Entry(tempdishing).State = EntityState.Deleted;
+                db.SaveChanges();
+            }
+            catch{}
+            try
+            {
+                foreach (var item in dishes.Ingredient)
+                {
+                    Ingredient temping = new Ingredient();
+                    Ingredient testing = db.Ingredient.Where(e => e.name == item.name).FirstOrDefault();
+                    if (testing == null)
+                    {
+                        temping.name = item.name;
+                        db.Ingredient.Add(temping);
+                        db.SaveChanges();
+                    }
+                    Ingredient ing_id = db.Ingredient.Where(e => e.name == temping.name).FirstOrDefault();
+                    DishesIngredient tempdishtoaddtotable = new DishesIngredient();
+                    tempdishtoaddtotable.Dishes_id = dishes.id;
+                    tempdishtoaddtotable.Ingredient_id = ing_id.id;
+                    db.DishesIngredient.Add(tempdishtoaddtotable);
+                    db.SaveChanges();
+
+                }
+            }
+            catch { }
+            try
+            {
+                db.Entry(dishes).State = EntityState.Modified;  //See if ingredient already exists
+
+                db.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!DishesExists(id)){return "dish doesnt exist";}
+                else{throw;}
+            } return "updated";
+        }
         [Route("dishes/getspecificdish/{id}")]
         // GET: specificDish by sending id
         [ResponseType(typeof(Dishes))]
@@ -53,58 +118,26 @@ namespace OnlineFoodAPI.Controllers
             {
                 return NotFound();
             }
+            try
+            {
+                List<Ingredient> temping = new List<Ingredient>();
+                List<DishesIngredient> ingredientlist = db.DishesIngredient.Where(e => e.Dishes_id == dishes.id).ToList();
+                foreach (var item in ingredientlist)
+                {
+                    Ingredient ingridienttemp = db.Ingredient.Find(item.Ingredient_id);
+                    ingridienttemp.Dishes = null;
+                    ingridienttemp.DishesIngredient = null;
+                    temping.Add(ingridienttemp);
+                }
+                dishes.Ingredient = temping;
+                dishes.DishesIngredient = null;
+            }
+            catch (Exception e) { }
 
             return Ok(dishes);
         }
 
-        [HttpPut]
-        [Route("dishes/updatedish/{id}/{userid}")] //send in a dish aswell with updated information  TODO: STILL HAS TO BE TESTED
-        [ResponseType(typeof(void))]
-        public IHttpActionResult PutDishes(int id, Dishes dishes, User userid)
-        {
-            User checkifadmin = db.User.Find(userid);
-            if (checkifadmin.role != "admin")
-            {
-                return BadRequest("User is not a admin");
-            }
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
 
-            if (id != dishes.id)
-            {
-                return BadRequest();
-            }
-            if(dishes.specialprice != null || dishes.specialprice != 0) //Checks if price is changed after specialprice is
-            {
-                Dishes dish = db.Dishes.Find(dishes.id);
-                if(dishes.price != dish.price)
-                {
-                    return BadRequest("Remove specialprice before changing normal price");
-                }
-            }
-
-            db.Entry(dishes).State = EntityState.Modified;
-
-            try
-            {
-                db.SaveChanges();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DishesExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return StatusCode(HttpStatusCode.NoContent);
-        }
 
         [HttpPost]
         [Route("dishes/gettotalpriceofbasket")]  //TODO - TEST if it works. 
@@ -153,17 +186,17 @@ namespace OnlineFoodAPI.Controllers
             Dishes tempdish1 = new Dishes();
             tempdish1.name = dishes.name;
             tempdish1.price = dishes.price;
-            if(dishes.specialprice != null || dishes.specialprice == 0)
+            if (dishes.specialprice != null || dishes.specialprice == 0)
             {
                 tempdish1.specialprice = dishes.specialprice;
             }
             tempdish1.Restaurant_id = dishes.Restaurant_id;
-            
+
 
             db.Dishes.Add(tempdish1);
             db.SaveChanges();
 
-            
+
             Dishes tempdish = db.Dishes.Where(e => e.name == dishes.name).FirstOrDefault();
             dishes.id = tempdish.id;
             foreach (var item in dishes.Ingredient)
@@ -174,9 +207,9 @@ namespace OnlineFoodAPI.Controllers
                 List<DishesIngredient> checkifexistlist = db.DishesIngredient.Where(e => e.Dishes_id == tempdishing.Dishes_id).ToList();
                 List<int> tempIngredientID = new List<int>();
                 bool addtodb = true;
-                foreach(var item2 in checkifexistlist)
+                foreach (var item2 in checkifexistlist)
                 {
-                    if (tempIngredientID.Any(x=> x.Equals(item2.Ingredient_id)))
+                    if (tempIngredientID.Any(x => x.Equals(item2.Ingredient_id)))
                     {
                         addtodb = false; //so that the db doesnt update if there already is an ingrediant that exist to the current dish_id
                     }
@@ -198,8 +231,8 @@ namespace OnlineFoodAPI.Controllers
             return CreatedAtRoute("DefaultApi", new { id = dishes.id }, dishes);
         }
 
-       
 
+        [HttpDelete]
         [Route("dishes/delete/{dishid}/{userid}")]  //TODO test
         [ResponseType(typeof(Dishes))]
         public IHttpActionResult DeleteDishes(int dishid, int userid)
@@ -216,12 +249,12 @@ namespace OnlineFoodAPI.Controllers
             }
 
             DishesIngredient tempdishing = db.DishesIngredient.Where(e => e.Dishes_id == dishid).FirstOrDefault();
-            if(tempdishing != null)
+            if (tempdishing != null)
             {
                 db.DishesIngredient.Remove(tempdishing);
                 db.SaveChanges();
             }
-           
+
             db.Dishes.Remove(dishes);
             db.SaveChanges();
 
