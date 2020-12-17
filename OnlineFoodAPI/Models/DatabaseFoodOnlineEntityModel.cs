@@ -18,7 +18,7 @@ namespace OnlineFoodAPI
         public virtual DbSet<Restaurant> Restaurant { get; set; }
         public virtual DbSet<User> User { get; set; }
         public DbSet<FavoritesRestaurants> FavoritesRestaurants { get; set; }
-        public DbSet<DishesIngredient> DishesIngredient { get; set; }
+        public virtual DbSet<DishesIngredient> DishesIngredient { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -72,11 +72,11 @@ namespace OnlineFoodAPI
                 .Property(e => e.name)
                 .IsUnicode(false);
 
-            modelBuilder.Entity<Restaurant>()
+            modelBuilder.Entity<Restaurant>() 
                 .HasMany(e => e.Dishes)
                 .WithRequired(e => e.Restaurant)
                 .HasForeignKey(e => e.Restaurant_id)
-                .WillCascadeOnDelete(false);
+                .WillCascadeOnDelete(false); 
 
             /*modelBuilder.Entity<Restaurant>()
                 .HasMany(e => e.User)

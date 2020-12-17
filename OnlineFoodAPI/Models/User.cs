@@ -44,10 +44,10 @@ namespace OnlineFoodAPI
         public string city { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Restaurant> Restaurant { get; set; }
+        public  ICollection<Restaurant> Restaurant { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Dishes> Dishes { get; set; }
+        public  ICollection<Dishes> Dishes { get; set; }
         public IList<FavoritesRestaurants> FavoritesRestaurants { get; set; }
 
     }
