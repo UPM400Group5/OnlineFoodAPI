@@ -18,13 +18,13 @@ namespace OnlineFoodAPI.Controllers
         private DatabaseFoodOnlineEntityModel db = new DatabaseFoodOnlineEntityModel();
 
         [HttpGet]
-        // GET: api/Restaurants
+        [Route("restaurants/all")]
         public IQueryable<Restaurant> GetRestaurant()
         {
             return db.Restaurant;
         }
 
-        // GET: api/Restaurants/5
+        [Route("restaurants/specific/{id}")]
         [ResponseType(typeof(Restaurant))]
         public IHttpActionResult GetRestaurant(int id)
         {
@@ -36,6 +36,8 @@ namespace OnlineFoodAPI.Controllers
 
             return Ok(restaurant);
         }
+
+
 
         [Route("restaurant/getfavrest/{userid}")]
         // GET: all favourite dishes by sending userid

@@ -17,13 +17,18 @@ namespace OnlineFoodAPI
         public virtual DbSet<Ingredient> Ingredient { get; set; }
         public virtual DbSet<Restaurant> Restaurant { get; set; }
         public virtual DbSet<User> User { get; set; }
-        public DbSet<FavoritesRestaurants> FavoritesRestaurants { get;set;}
+        public DbSet<FavoritesRestaurants> FavoritesRestaurants { get; set; }
+        public DbSet<DishesIngredient> DishesIngredient { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Entity<FavoritesRestaurants>()
                 .HasKey(k => new { k.Restaurant_id, k.User_id })
                 .ToTable("FavoritesRestaurants");
+
+            modelBuilder.Entity<DishesIngredient>()
+                .HasKey(k => new { k.Dishes_id, k.Ingredient_id })
+                .ToTable("DishesIngredient");
 
 
             /*modelBuilder.Entity<FavoritesRestaurants>()
@@ -41,10 +46,10 @@ namespace OnlineFoodAPI
                 .Property(e => e.name)
                 .IsUnicode(false);
 
-            modelBuilder.Entity<Dishes>()
+            /*modelBuilder.Entity<Dishes>()
                 .HasMany(e => e.Ingredient)
                 .WithMany(e => e.Dishes)
-                .Map(m => m.ToTable("DishesIngredient"));
+                .Map(m => m.ToTable("DishesIngredient"));*/
 
             modelBuilder.Entity<Dishes>()
                 .HasMany(e => e.User)
@@ -106,7 +111,7 @@ namespace OnlineFoodAPI
                 .Property(e => e.city)
                 .IsUnicode(false);
 
-           
+
         }
     }
 }

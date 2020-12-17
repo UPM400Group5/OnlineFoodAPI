@@ -24,6 +24,7 @@ namespace OnlineFoodAPI
         public int Restaurant_id { get; set; }
 
         public int price { get; set; }
+        public int? specialprice { get; set; }
 
         public virtual Restaurant Restaurant { get; set; }
 

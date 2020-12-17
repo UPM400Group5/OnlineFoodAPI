@@ -16,13 +16,14 @@ namespace OnlineFoodAPI.Controllers
     {
         private DatabaseFoodOnlineEntityModel db = new DatabaseFoodOnlineEntityModel();
 
-        // GET: api/Ingredients
+        [HttpGet]
+        [Route("ingredient/getall")]
         public IQueryable<Ingredient> GetIngredient()
         {
             return db.Ingredient;
         }
 
-        // GET: api/Ingredients/5
+        [Route("ingredient/getspecific/{id}")]
         [ResponseType(typeof(Ingredient))]
         public IHttpActionResult GetIngredient(int id)
         {
@@ -35,10 +36,16 @@ namespace OnlineFoodAPI.Controllers
             return Ok(ingredient);
         }
 
-        // PUT: api/Ingredients/5
+        [HttpPut]
+        [Route("ingredient/update/{id}/{userid}")]
         [ResponseType(typeof(void))]
-        public IHttpActionResult PutIngredient(int id, Ingredient ingredient)
+        public IHttpActionResult PutIngredient(int id, Ingredient ingredient, int userid)
         {
+            User checkifadmin = db.User.Find(userid);
+            if (checkifadmin.role != "admin")
+            {
+                return BadRequest("User is not a admin");
+            }
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
