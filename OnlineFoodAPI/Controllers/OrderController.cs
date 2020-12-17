@@ -29,8 +29,6 @@ namespace OnlineFoodAPI.Controllers
                         foreach (var item in orderDetails.dishes)
                         {
                             sum += item.price;
-
-
                         }
                         
                         //TODO: lägg till koppling till order tabellen

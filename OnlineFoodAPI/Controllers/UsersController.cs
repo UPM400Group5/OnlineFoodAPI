@@ -18,9 +18,28 @@ namespace OnlineFoodAPI.Controllers
         private DatabaseFoodOnlineEntityModel db = new DatabaseFoodOnlineEntityModel();
 
         // get: api/Users
-        public IQueryable<User> GetUser()
+        [HttpGet]
+        [Route("Users/All/{id}")]
+        [ResponseType(typeof(List<UserModel>))]
+        public List<UserModel> GetAllUsers(int id)
         {
-            return db.User;
+            // Check user by id, then check role and make it lowercase
+            if (db.User.Find(id).role.ToLower() == "admin") 
+            {
+                // db.users did not work. I had to make a 
+                List<UserModel> userList = new List<UserModel>();
+                var users = db.User;
+
+                foreach (var item in users)
+                {
+                    UserModel model = new UserModel(item);
+                    userList.Add(model);
+                }
+
+                return userList;
+            }
+
+            return null;
         }
 
         // GET: api/Users/5

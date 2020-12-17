@@ -19,6 +19,7 @@ namespace OnlineFoodAPI.Controllers
             {
                 using (DatabaseFoodOnlineEntityModel db = new DatabaseFoodOnlineEntityModel())
                 {
+                    // If username and password fits a person in the database
                     var user = db.User.Where(x => x.username == loginDetails.username && x.password == loginDetails.password).FirstOrDefault();
 
                     if (user != null)
@@ -27,17 +28,12 @@ namespace OnlineFoodAPI.Controllers
                         UserModel model = new UserModel(user);
                         return model;
                     }
-
-                    // Return null if invalid
-                    return null;
                 }
             }
-            catch 
-            {   
-                // If error, return null
-                return null;
-            }
-            
+            catch {  }
+
+            // Return null if invalid or failed
+            return null;
         }
     }
 }

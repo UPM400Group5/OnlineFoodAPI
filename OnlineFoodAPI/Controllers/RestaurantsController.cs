@@ -119,6 +119,29 @@ namespace OnlineFoodAPI.Controllers
             return CreatedAtRoute("DefaultApi", new { id = restaurant.id }, restaurant);
         }
 
+        [HttpGet]
+        [Route("restaurant/sort/{city}")]
+        public List<Restaurant> GetSortedCity(string city)
+        {
+            List<Restaurant> restaurantsList = new List<Restaurant>();
+            var restaurants = db.Restaurant.Where(x => x.city.ToLower() == city.ToLower()).ToList();
+
+            foreach (var item in restaurants)
+            {
+                Restaurant temp = new Restaurant();
+
+                temp.city = item.city;
+                temp.delivery_price = item.delivery_price;
+                temp.adress = item.adress;
+                temp.id = item.id;
+                temp.name = item.name;
+
+                restaurantsList.Add(temp);
+            }
+
+            return restaurantsList;
+        }
+
 
         // DELETE: api/Restaurants/5
         [ResponseType(typeof(Restaurant))]
