@@ -37,7 +37,8 @@ namespace OnlineFoodAPI.Controllers
                         temping.Add(ingridienttemp);
                     }
                     item.Ingredient = temping;
-                    item.DishesIngredient = null;
+                    item.DishesIngredient = null;  
+
                 }
             }
             catch (Exception e){}
@@ -71,6 +72,7 @@ namespace OnlineFoodAPI.Controllers
                 db.DishesIngredient.Attach(tempdishing);
                 db.Entry(tempdishing).State = EntityState.Deleted;
                 db.SaveChanges();
+                
             }
             catch{}
             try
@@ -79,13 +81,18 @@ namespace OnlineFoodAPI.Controllers
                 {
                     Ingredient temping = new Ingredient();
                     Ingredient testing = db.Ingredient.Where(e => e.name == item.name).FirstOrDefault();
+                    Ingredient ing_id = new Ingredient();
                     if (testing == null)
                     {
                         temping.name = item.name;
                         db.Ingredient.Add(temping);
+                        ing_id = db.Ingredient.Where(e => e.name == temping.name).FirstOrDefault();
                         db.SaveChanges();
                     }
-                    Ingredient ing_id = db.Ingredient.Where(e => e.name == temping.name).FirstOrDefault();
+                    else
+                    {
+                        ing_id = testing;
+                    }
                     DishesIngredient tempdishtoaddtotable = new DishesIngredient();
                     tempdishtoaddtotable.Dishes_id = dishes.id;
                     tempdishtoaddtotable.Ingredient_id = ing_id.id;
@@ -96,7 +103,19 @@ namespace OnlineFoodAPI.Controllers
             catch { }
             try
             {
-                db.Entry(dishes).State = EntityState.Modified;  //See if ingredient already exists
+                var activityinDb = db.Dishes.Find(dishes.id);
+                if(activityinDb == null)
+                {
+                    db.Dishes.Add(dishes);
+                    db.SaveChanges();
+                }
+                activityinDb.name  = dishes.name;
+                activityinDb.price = dishes.price;
+                //activityinDb.Ingredient = temping; //NEVER UPDATE THIS DB WITH INGREDIENT
+                activityinDb.Restaurant_id = dishes.Restaurant_id;
+                activityinDb.Restaurant = db.Restaurant.Find(dishes.Restaurant_id);
+                activityinDb.specialprice = dishes.specialprice;
+                db.Entry(activityinDb).State = EntityState.Modified;  //See if ingredient already exists
                 db.SaveChanges();
             }
             catch (DbUpdateConcurrencyException)
@@ -127,7 +146,7 @@ namespace OnlineFoodAPI.Controllers
                     temping.Add(ingridienttemp);
                 }
                 dishes.Ingredient = temping;
-                dishes.DishesIngredient = null;
+                dishes.DishesIngredient = null; 
             }
             catch (Exception e) { }
             return Ok(dishes);
