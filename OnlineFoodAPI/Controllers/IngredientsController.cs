@@ -128,7 +128,6 @@ namespace OnlineFoodAPI.Controllers
             }
             base.Dispose(disposing);
         }
-
         private bool IngredientExists(int id)
         {
             return db.Ingredient.Count(e => e.id == id) > 0;

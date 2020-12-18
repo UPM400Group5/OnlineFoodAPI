@@ -33,11 +33,8 @@ namespace OnlineFoodAPI.Controllers
             {
                 return NotFound();
             }
-
             return Ok(restaurant);
         }
-
-
 
         [Route("restaurant/getfavrest/{userid}")]
         // GET: all favourite dishes by sending userid
@@ -62,6 +59,8 @@ namespace OnlineFoodAPI.Controllers
                 restaurant.adress = item.adress;
                 restaurant.city = item.city;
                 restaurant.delivery_price = item.delivery_price;
+                restaurant.email = item.email;
+                restaurant.phonenumber = item.phonenumber;
                 // restaurant.Dishes= item.Dishes;
                 restaurants.Add(restaurant);
             }
@@ -142,7 +141,6 @@ namespace OnlineFoodAPI.Controllers
         {
             return db.Dishes.Where(x => x.Restaurant_id == id).ToList(); 
         }
-
 
         // DELETE: api/Restaurants/5
         [ResponseType(typeof(Restaurant))]

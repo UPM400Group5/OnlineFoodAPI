@@ -44,12 +44,11 @@ namespace OnlineFoodAPI.Controllers
             return alldishes;
         }
 
-
         [HttpPut]
         [Route("dishes/update/{id}/{userid}")]
         public string PutDishess(int id, int userid, Dishes dishes)
         {
-            User checkifadmin = db.User.Find(userid);
+            User checkifadmin = db.User.Find(userid); //check if the user should be able to continue
             if (checkifadmin.role != "admin")
             {
                 return "User is not a admin";
@@ -92,14 +91,12 @@ namespace OnlineFoodAPI.Controllers
                     tempdishtoaddtotable.Ingredient_id = ing_id.id;
                     db.DishesIngredient.Add(tempdishtoaddtotable);
                     db.SaveChanges();
-
                 }
             }
             catch { }
             try
             {
                 db.Entry(dishes).State = EntityState.Modified;  //See if ingredient already exists
-
                 db.SaveChanges();
             }
             catch (DbUpdateConcurrencyException)
@@ -133,11 +130,8 @@ namespace OnlineFoodAPI.Controllers
                 dishes.DishesIngredient = null;
             }
             catch (Exception e) { }
-
             return Ok(dishes);
         }
-
-
 
         [HttpPost]
         [Route("dishes/gettotalpriceofbasket")]  //TODO - TEST if it works. 
@@ -149,7 +143,6 @@ namespace OnlineFoodAPI.Controllers
                 if (item.price != 0 && item.specialprice == null)
                 {
                     return "something isn't quite right, ERROR: price isnt set";
-
                 }
                 if (item.specialprice == null)
                 {
@@ -159,7 +152,6 @@ namespace OnlineFoodAPI.Controllers
                 {
                     totalprice += item.specialprice.GetValueOrDefault();
                 }
-
             }
             return totalprice.ToString();
         }
@@ -192,10 +184,8 @@ namespace OnlineFoodAPI.Controllers
             }
             tempdish1.Restaurant_id = dishes.Restaurant_id;
 
-
-            db.Dishes.Add(tempdish1);
+            db.Dishes.Add(tempdish1); //First add dish to dishes
             db.SaveChanges();
-
 
             Dishes tempdish = db.Dishes.Where(e => e.name == dishes.name).FirstOrDefault();
             dishes.id = tempdish.id;
@@ -226,11 +216,9 @@ namespace OnlineFoodAPI.Controllers
                         return BadRequest("Could not save to table dishesingredient | " + e);
                     }
                 }
-
             }
             return CreatedAtRoute("DefaultApi", new { id = dishes.id }, dishes);
         }
-
 
         [HttpDelete]
         [Route("dishes/delete/{dishid}/{userid}")]  //TODO test

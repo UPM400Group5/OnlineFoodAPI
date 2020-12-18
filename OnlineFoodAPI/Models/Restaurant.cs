@@ -33,6 +33,8 @@ namespace OnlineFoodAPI
         public string name { get; set; }
 
         public int delivery_price { get; set; }
+        public string email { get; set; }
+        public string phonenumber { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public  ICollection<Dishes> Dishes { get; set; }

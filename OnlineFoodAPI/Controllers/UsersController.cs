@@ -38,10 +38,8 @@ namespace OnlineFoodAPI.Controllers
                     UserModel model = new UserModel(item);
                     userList.Add(model);
                 }
-
                 return userList;
             }
-
             return null;
         }
 
@@ -54,7 +52,6 @@ namespace OnlineFoodAPI.Controllers
             {
                 return NotFound();
             }
-
             return Ok(user);
         }
 
@@ -98,7 +95,6 @@ namespace OnlineFoodAPI.Controllers
                     throw;
                 }
             }
-
             return StatusCode(HttpStatusCode.NoContent);
         }
 
@@ -135,7 +131,6 @@ namespace OnlineFoodAPI.Controllers
             FavoritesRestaurants favoritesRestaurant = new FavoritesRestaurants();
             favoritesRestaurant.Restaurant_id = Restaurant.id;
             favoritesRestaurant.User_id = user.id;
-
             try
             {
                 db.FavoritesRestaurants.Add(favoritesRestaurant);
@@ -146,8 +141,6 @@ namespace OnlineFoodAPI.Controllers
             {
                 return "exception " + e.Message;
             }
-
-
         }
 
         [HttpDelete]
@@ -163,7 +156,6 @@ namespace OnlineFoodAPI.Controllers
             FavoritesRestaurants favoritesRestaurant = new FavoritesRestaurants();
             favoritesRestaurant.Restaurant_id = Restaurant.id;
             favoritesRestaurant.User_id = user.id;
-
             try
             {
                 db.FavoritesRestaurants.Attach(favoritesRestaurant);
@@ -175,12 +167,7 @@ namespace OnlineFoodAPI.Controllers
             {
                 return "exception " + e.Message;
             }
-
-
         }
-
-
-
         #endregion
 
 
