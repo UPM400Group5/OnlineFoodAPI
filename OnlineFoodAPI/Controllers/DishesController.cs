@@ -28,16 +28,16 @@ namespace OnlineFoodAPI.Controllers
                 foreach (var item in alldishes) //make sure ingredient exist as an object.
                 {
                     List<Ingredient> temping = new List<Ingredient>();
-                    List<DishesIngredient> ingredientlist = db.DishesIngredient.Where(e => e.Dishes_id == item.id).ToList();
-                    foreach (var item2 in ingredientlist)
+                    List<DishesIngredient> ingredientlist = db.DishesIngredient.Where(e => e.Dishes_id == item.id).ToList(); //find every dish that has an id connected to each dish from dbo.DishesIngredient
+                    foreach (var item2 in ingredientlist) 
                     {
-                        Ingredient ingridienttemp = db.Ingredient.Find(item2.Ingredient_id);
-                        ingridienttemp.Dishes = null;
-                        ingridienttemp.DishesIngredient = null;
-                        temping.Add(ingridienttemp);
+                        Ingredient ingridienttemp = db.Ingredient.Find(item2.Ingredient_id); //find each ingredient to make an object out of it.
+                        ingridienttemp.Dishes = null; //so the data isnt recursive
+                        ingridienttemp.DishesIngredient = null; //so the data isnt recursive
+                        temping.Add(ingridienttemp); //add ingredient to list 
                     }
-                    item.Ingredient = temping;
-                    item.DishesIngredient = null;  
+                    item.Ingredient = temping; //specify that each ingredient associated to the Dish(item) is an object.
+                    item.DishesIngredient = null;  //so the data isnt recursive  
 
                 }
             }
