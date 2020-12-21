@@ -18,13 +18,19 @@ namespace OnlineFoodAPI.Controllers
         private DatabaseFoodOnlineEntityModel db = new DatabaseFoodOnlineEntityModel();
 
         [HttpGet]
-        [Route("restaurants/all")]
-        public IQueryable<Restaurant> GetRestaurant()
+        [Route("restaurant/all")]
+        public List<Restaurant> GetRestaurant()
         {
-            return db.Restaurant;
+            List<Restaurant> restList = db.Restaurant.ToList(); //adds all restaurangs 
+            foreach(var item in restList)
+            {
+                item.Dishes = db.Dishes.Where(e => e.Restaurant_id == item.id).ToList();
+
+            }
+            return restList;
         }
 
-        [Route("restaurants/specific/{id}")]
+        [Route("restaurant/specific/{id}")]
         [ResponseType(typeof(Restaurant))]
         public IHttpActionResult GetRestaurant(int id)
         {
@@ -33,6 +39,8 @@ namespace OnlineFoodAPI.Controllers
             {
                 return NotFound();
             }
+            restaurant.Dishes = db.Dishes.Where(e => e.Restaurant_id == restaurant.id).ToList();
+
             return Ok(restaurant);
         }
 
@@ -67,18 +75,14 @@ namespace OnlineFoodAPI.Controllers
             return restaurants;
         }
 
-        // PUT: api/Restaurants/5
+        [HttpPut]
+        [Route("restaurant/update")]
         [ResponseType(typeof(void))]
-        public IHttpActionResult PutRestaurant(int id, Restaurant restaurant)
+        public IHttpActionResult PutRestaurant(Restaurant restaurant) //sends in object in body
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
-            }
-
-            if (id != restaurant.id)
-            {
-                return BadRequest();
             }
 
             db.Entry(restaurant).State = EntityState.Modified;
@@ -89,7 +93,7 @@ namespace OnlineFoodAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!RestaurantExists(id))
+                if (!RestaurantExists(restaurant.id))
                 {
                     return NotFound();
                 }
@@ -99,7 +103,7 @@ namespace OnlineFoodAPI.Controllers
                 }
             }
 
-            return StatusCode(HttpStatusCode.NoContent);
+            return StatusCode(HttpStatusCode.OK);
         }
 
         [HttpPost] 
