@@ -71,6 +71,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DatabaseModels\Dishes.cs" />
+    <Compile Include="DatabaseModels\DishesIngredient.cs" />
+    <Compile Include="DatabaseModels\FavoritesRestaurants.cs" />
     <Compile Include="DatabaseModels\Ingredient.cs" />
     <Compile Include="LoginTest.cs" />
     <Compile Include="DatabaseModels\OnlineFoodDatabaseModel.cs" />

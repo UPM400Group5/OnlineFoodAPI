@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
 using System.Linq;
+using UnitTestAPI.Models;
 
 namespace UnitTestAPI
 {
@@ -16,17 +17,44 @@ namespace UnitTestAPI
         public virtual DbSet<Ingredient> Ingredient { get; set; }
         public virtual DbSet<Restaurant> Restaurant { get; set; }
         public virtual DbSet<User> User { get; set; }
+        public DbSet<FavoritesRestaurants> FavoritesRestaurants { get; set; }
+        public DbSet<DishesIngredient> DishesIngredient { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<FavoritesRestaurants>()
+                .HasKey(k => new { k.Restaurant_id, k.User_id })
+                .ToTable("FavoritesRestaurants");
+
+            modelBuilder.Entity<DishesIngredient>()
+                .HasKey(k => new { k.Dishes_id, k.Ingredient_id })
+                .ToTable("DishesIngredient");
+
+
+            /*modelBuilder.Entity<FavoritesRestaurants>()
+                .HasRequired(e => e.Restaurant)
+                .WithMany()
+                .HasForeignKey(c => c.Restaurant_id);
+
+            modelBuilder.Entity<FavoritesRestaurants>()
+                .HasRequired(e => e.User)
+                .WithMany()
+                .HasForeignKey(c => c.User_id); */
+
+
             modelBuilder.Entity<Dishes>()
                 .Property(e => e.name)
                 .IsUnicode(false);
 
-            modelBuilder.Entity<Dishes>()
+            /*modelBuilder.Entity<Dishes>()
                 .HasMany(e => e.Ingredient)
                 .WithMany(e => e.Dishes)
-                .Map(m => m.ToTable("DishesIngredient"));
+                .Map(m => m.ToTable("DishesIngredient"));*/
+
+            /*modelBuilder.Entity<Dishes>()
+                .HasMany(e => e.User)
+                .WithMany(e => e.Dishes)
+                .Map(m => m.ToTable("Order")); */
 
             modelBuilder.Entity<Ingredient>()
                 .Property(e => e.name)
@@ -45,23 +73,15 @@ namespace UnitTestAPI
                 .IsUnicode(false);
 
             modelBuilder.Entity<Restaurant>()
-                .Property(e => e.email)
-                .IsUnicode(false);
-
-            modelBuilder.Entity<Restaurant>()
-                .Property(e => e.phonenumber)
-                .IsUnicode(false);
-
-            modelBuilder.Entity<Restaurant>()
                 .HasMany(e => e.Dishes)
                 .WithRequired(e => e.Restaurant)
                 .HasForeignKey(e => e.Restaurant_id)
                 .WillCascadeOnDelete(false);
 
-            modelBuilder.Entity<Restaurant>()
+            /*modelBuilder.Entity<Restaurant>()
                 .HasMany(e => e.User)
                 .WithMany(e => e.Restaurant)
-                .Map(m => m.ToTable("FavoritesRestaurants"));
+                .Map(m => m.ToTable("FavoritesRestaurants")); */
 
             modelBuilder.Entity<User>()
                 .Property(e => e.role)

@@ -1,8 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using OnlineFoodAPI.Controllers;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using UnitTestAPI.Models;
 
 namespace UnitTestAPI
 {
@@ -12,7 +11,7 @@ namespace UnitTestAPI
         [TestMethod]
         public void AddRestaurant()
         {
-            using (OnlineFoodDatabaseModel db = new OnlineFoodDatabaseModel()) 
+            using (OnlineFoodDatabaseModel db = new OnlineFoodDatabaseModel())
             {
 
             }
@@ -22,7 +21,7 @@ namespace UnitTestAPI
         {
             using (OnlineFoodDatabaseModel db = new OnlineFoodDatabaseModel())
             {
-            
+
             }
         }
         [TestMethod]
@@ -46,25 +45,27 @@ namespace UnitTestAPI
             }
         }
         [TestMethod]
-        public void RestaurantDishes()
+        public void GetRestaurantDishesByRestaurantId()
         {
             using (OnlineFoodDatabaseModel db = new OnlineFoodDatabaseModel())
             {
                 int id = 1;
-                var result =  db.Dishes.Where(x => x.Restaurant_id == id).ToList();
+                var result = db.Dishes.Where(x => x.Restaurant_id == id).ToList();
 
                 Assert.AreNotEqual(null, result);
             }
         }
         [TestMethod]
-        public void FavorieRestaurants() 
+        public void GetFavoriteRestaurantsByUserId()
         {
             using (OnlineFoodDatabaseModel db = new OnlineFoodDatabaseModel())
             {
+                int id = 1;
+
                 //TODO: fixa modellerna
                 List<Restaurant> temprestaurants = new List<Restaurant>();
                 List<Restaurant> restaurants = new List<Restaurant>();
-               // List<OnlineFoodAPI.Models.FavoritesRestaurants> FavoriteRestaurants = db.FavoritesRestaurants.Where(uid => uid.User_id == userid).ToList();
+                List<FavoritesRestaurants> FavoriteRestaurants = db.FavoritesRestaurants.Where(uid => uid.User_id == id).ToList();
                 if (FavoriteRestaurants.Count != 0)
                 {
                     foreach (var item in FavoriteRestaurants)
@@ -73,6 +74,7 @@ namespace UnitTestAPI
                         temprestaurants.Add(db.Restaurant.Where(fr => fr.id == item.Restaurant_id).FirstOrDefault());
                     }
                 }
+
                 foreach (var item in temprestaurants)
                 {
                     Restaurant restaurant = new Restaurant();
@@ -86,6 +88,8 @@ namespace UnitTestAPI
                     // restaurant.Dishes= item.Dishes;
                     restaurants.Add(restaurant);
                 }
+
+                Assert.IsNotNull(restaurants);
             }
         }
 
