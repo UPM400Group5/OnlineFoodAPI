@@ -69,6 +69,7 @@ namespace UnitTestAPI
             }
                 
         }
+
         [TestMethod]
         public void DeleteRestaurant()
         {
@@ -112,7 +113,7 @@ namespace UnitTestAPI
                 int id = 1;
                 var result = db.Dishes.Where(x => x.Restaurant_id == id).ToList();
 
-                Assert.AreNotEqual(null, result);
+                Assert.IsNotNull(result);
             }
         }
         [TestMethod]

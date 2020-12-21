@@ -4,7 +4,7 @@ using System;
 namespace UnitTestAPI
 {
     [TestClass]
-    public class IngredientsController
+    public class DishesTest
     {
         [TestMethod]
         public void TestMethod1()

@@ -80,8 +80,9 @@
     <Compile Include="DatabaseModels\DishesTest.cs" />
     <Compile Include="DatabaseModels\Restaurant.cs" />
     <Compile Include="RestaurantsTest.cs" />
-    <Compile Include="IngredientsController.cs" />
+    <Compile Include="IngredientTest.cs" />
     <Compile Include="DatabaseModels\User.cs" />
+    <Compile Include="DishesTest.cs" />
     <Compile Include="UserTest.cs" />
   </ItemGroup>
   <ItemGroup>
