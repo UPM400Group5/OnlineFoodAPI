@@ -171,7 +171,8 @@ namespace OnlineFoodAPI.Controllers
         #endregion
 
 
-        // DELETE: api/Users/5
+        [HttpDelete]
+        [Route("Users/{id}")]
         [ResponseType(typeof(User))]
         public IHttpActionResult DeleteUser(int id)
         {
@@ -179,6 +180,11 @@ namespace OnlineFoodAPI.Controllers
             if (user == null)
             {
                 return NotFound();
+            }
+            List<FavoritesRestaurants> templist = db.FavoritesRestaurants.Where(e => e.User_id == user.id).ToList();
+            foreach(var item in templist)
+            {
+                db.FavoritesRestaurants.Remove(item);
             }
 
             db.User.Remove(user);
