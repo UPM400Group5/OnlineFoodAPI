@@ -46,31 +46,26 @@ namespace OnlineFoodAPI.Controllers
 
         [Route("restaurant/getfavrest/{userid}")]
         // GET: all favourite dishes by sending userid
-        public List<Restaurant> GetFavouriteRestaurant(int userid)
+        public List<Restaurant> GetFavouriteRestaurant(int userid) //get the users from header userid, to see which favourite restaurant the user has. 
         {
-            List<Restaurant> temprestaurants = new List<Restaurant>();
-            List<Restaurant> restaurants = new List<Restaurant>();
-            List<FavoritesRestaurants> FavoriteRestaurants = db.FavoritesRestaurants.Where(uid => uid.User_id == userid).ToList();
-            if (FavoriteRestaurants.Count != 0)
+            List<Restaurant> temprestaurants = new List<Restaurant>(); //make a list of restaurants
+            List<Restaurant> restaurants = new List<Restaurant>(); //the list we are returning
+            List<FavoritesRestaurants> FavoriteRestaurants = db.FavoritesRestaurants.Where(uid => uid.User_id == userid).ToList(); //see all favourite restraurants the user has.
+            if (FavoriteRestaurants.Count != 0) //see so the list has objects in it
             {
-                foreach (var item in FavoriteRestaurants)
+                foreach (var item in FavoriteRestaurants) 
                 {
                     Restaurant restaurant = new Restaurant();
-                    temprestaurants.Add(db.Restaurant.Where(fr => fr.id == item.Restaurant_id).FirstOrDefault());
+                    temprestaurants.Add(db.Restaurant.Where(fr => fr.id == item.Restaurant_id).FirstOrDefault()); //add restaurant id 
                 }
             }
             foreach(var item in temprestaurants)
             {
-                Restaurant restaurant = new Restaurant();
-                restaurant.id = item.id;
-                restaurant.name = item.name;
-                restaurant.adress = item.adress;
-                restaurant.city = item.city;
-                restaurant.delivery_price = item.delivery_price;
-                restaurant.email = item.email;
-                restaurant.phonenumber = item.phonenumber;
-                // restaurant.Dishes= item.Dishes;
-                restaurants.Add(restaurant);
+                item.User = null; //so that the data isnt recursive
+                item.FavoritesRestaurants = null; //so that the data isnt recursive
+                List<Dishes> tempdish = db.Dishes.Where(e => e.Restaurant_id == item.id).ToList(); // Adds the restaurant.dishes so frontend can use it directly
+                item.Dishes = tempdish; 
+                restaurants.Add(item); //adds the object to the list ready for return
             }
             return restaurants;
         }
