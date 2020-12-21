@@ -24,30 +24,22 @@ namespace OnlineFoodAPI.Controllers
         /// Get all data from users, send in current userID. Should only be allowed as admin
         /// </summary>
         [ResponseType(typeof(List<UserModel>))]
-        public List<UserModel> GetAllUsers(int id)
+        public List<User> GetAllUsers(int id)
         {
             // Check user by id, then check role and make it lowercase
             if (db.User.Find(id).role.ToLower() == "admin") 
             {
-                // db.users did not work. I had to make a 
-                List<UserModel> userList = new List<UserModel>();
-                var users = db.User;
-
-                foreach (var item in users)
-                {
-                    UserModel model = new UserModel(item);
-                    userList.Add(model);
-                }
-                return userList;
+                return db.User.ToList(); //return all user if the user is admin
             }
             return null;
         }
 
+         [Route("Users/{id}")]
         // GET: api/Users/5
         [ResponseType(typeof(User))]
         public IHttpActionResult GetUser(int id)
         {
-            User user = db.User.Find(id);
+            User user = db.User.Find(id); //find user from id in header of api
             if (user == null)
             {
                 return NotFound();
@@ -55,30 +47,29 @@ namespace OnlineFoodAPI.Controllers
             return Ok(user);
         }
 
-        // PUT: api/Users/5
+        [HttpPut]
+        [Route("Users/{id}")]
         [ResponseType(typeof(void))]
-        public IHttpActionResult PutUser(int id, User user)
+        public IHttpActionResult PutUser(int id, User user) //id is from header of api, user is sent from body
         {
-            user = db.User.Find(id);
-
-            if (!ModelState.IsValid)
+            user = db.User.Find(id); //find user from id
+            if (!ModelState.IsValid) //check if the model is valid
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != user.id)
+            if (id != user.id) //se if sent id is the same as user. If user is null you wont be sent past.
             {
-                return BadRequest();
+                return BadRequest("Cant find user");
             }
 
             // If password length is less than 6, dont continue
-            if (user.password.Length < 6) 
+            if (user.password.Length <= 6) 
             {
-                //TODO: annat meddelande?
-                return BadRequest();
+                return BadRequest("Password length is less than 6");
             }
 
-            db.Entry(user).State = EntityState.Modified;
+            db.Entry(user).State = EntityState.Modified; //tell db to modify the user
 
             try
             {
@@ -86,7 +77,7 @@ namespace OnlineFoodAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!UserExists(id))
+                if (!UserExists(id)) //if user doesnt exist with the id
                 {
                     return NotFound();
                 }
@@ -98,24 +89,23 @@ namespace OnlineFoodAPI.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // POST: api/Users
-        [HttpPost]
 
+        [HttpPost]
+        [Route("Users")]
         [ResponseType(typeof(User))]
-        public IHttpActionResult PostUser(User user)
+        public IHttpActionResult PostUser(User user) //new user
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid) //check if the model is valid
             {
                 return BadRequest(ModelState);
             }
 
-            if (user.password.Length < 6)
+            if (user.password.Length <= 6)  //check if password length is less than 6
             {
-                //TODO: annat meddelande?
-                return BadRequest();
+                return BadRequest("Password length is less than 6");
             }
 
-            db.User.Add(user);
+            db.User.Add(user); //add user to db
             db.SaveChanges();
 
             return CreatedAtRoute("DefaultApi", new { id = user.id }, user);
@@ -124,16 +114,16 @@ namespace OnlineFoodAPI.Controllers
         #region FAVOURITE RESTAURANTS
         [HttpGet]
         [Route("Users/addfavrest/{userid}/{restid}")]
-        public string AddFavRest(int userid, int restid)
+        public string AddFavRest(int userid, int restid) //Ad, with GET, Favourite restaurant to db. Since user sho uld only press an icon to add.
         {
-            User user = db.User.Find(userid);
-            var Restaurant = db.Restaurant.Find(restid);
-            FavoritesRestaurants favoritesRestaurant = new FavoritesRestaurants();
+            User user = db.User.Find(userid); //find user with logged in userid sent through header of api
+            var Restaurant = db.Restaurant.Find(restid); //find restaurant with restaurantID sent through header of api
+            FavoritesRestaurants favoritesRestaurant = new FavoritesRestaurants(); //specify the new favouriterestaurant with an object to send to dbo.FavouriteRestaurant
             favoritesRestaurant.Restaurant_id = Restaurant.id;
             favoritesRestaurant.User_id = user.id;
             try
             {
-                db.FavoritesRestaurants.Add(favoritesRestaurant);
+                db.FavoritesRestaurants.Add(favoritesRestaurant); //add to db
                 db.SaveChanges();
                 return "Success";
             }
@@ -145,22 +135,22 @@ namespace OnlineFoodAPI.Controllers
 
         [HttpDelete]
         [Route("Users/Removefavrest/{userid}/{restid}")]   //Removes favrestauarant - Tested and works
-        public string RemoveFavRest(int userid, int restid)
+        public string RemoveFavRest(int userid, int restid) //only from header of api since the user should only press a button to 'unsubscribe'
         {
-            User user = db.User.Find(userid);
-            var Restaurant = db.Restaurant.Find(restid);
-            if (Restaurant == null)
+            User user = db.User.Find(userid); //find user in dbo.User with userid from header of api
+            var Restaurant = db.Restaurant.Find(restid); //find restaurant from dbo.restaurants with restid from header of api
+            if (Restaurant == null) //if restaurant cant be found
             {
                 return "could not find the restaurant";
             }
-            FavoritesRestaurants favoritesRestaurant = new FavoritesRestaurants();
-            favoritesRestaurant.Restaurant_id = Restaurant.id;
+            FavoritesRestaurants favoritesRestaurant = new FavoritesRestaurants();  //make an object out of the data we found
+            favoritesRestaurant.Restaurant_id = Restaurant.id; 
             favoritesRestaurant.User_id = user.id;
             try
             {
-                db.FavoritesRestaurants.Attach(favoritesRestaurant);
-                db.Entry(favoritesRestaurant).State = EntityState.Deleted;
-                db.SaveChanges();
+                db.FavoritesRestaurants.Attach(favoritesRestaurant); //telling db what kind of object to delete
+                db.Entry(favoritesRestaurant).State = EntityState.Deleted;  //db deletes it
+                db.SaveChanges(); //save db
                 return "Success";
             }
             catch (Exception e)
@@ -174,20 +164,20 @@ namespace OnlineFoodAPI.Controllers
         [HttpDelete]
         [Route("Users/{id}")]
         [ResponseType(typeof(User))]
-        public IHttpActionResult DeleteUser(int id)
+        public IHttpActionResult DeleteUser(int id) //delete user with only an id from header of api
         {
-            User user = db.User.Find(id);
-            if (user == null)
+            User user = db.User.Find(id); //find the user from dbo.User using the id from header of api
+            if (user == null) //if the user cant be found return notfound();
             {
                 return NotFound();
             }
-            List<FavoritesRestaurants> templist = db.FavoritesRestaurants.Where(e => e.User_id == user.id).ToList();
+            List<FavoritesRestaurants> templist = db.FavoritesRestaurants.Where(e => e.User_id == user.id).ToList(); //have to remove foreign key restraints in dbo.FavouriteRestaurant
             foreach(var item in templist)
             {
-                db.FavoritesRestaurants.Remove(item);
+                db.FavoritesRestaurants.Remove(item); //remove each object connected to the user
             }
 
-            db.User.Remove(user);
+            db.User.Remove(user); //no foreignkey restraints, clear to delete the user.
             db.SaveChanges();
 
             return Ok(user);
