@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnitTestAPI.Models;
@@ -11,9 +12,29 @@ namespace UnitTestAPI
         [TestMethod]
         public void AddRestaurant()
         {
+            bool succeded = false;
             using (OnlineFoodDatabaseModel db = new OnlineFoodDatabaseModel())
             {
+                Restaurant restaurant = new Restaurant { 
+                    name = "Max", 
+                    adress = "Storgatan 43", 
+                    city = "Trollhättan", 
+                    delivery_price = 65, 
+                    email = "Max@gmail.com", 
+                    phonenumber = "34556352342" 
+                };
+  
+                try
+                {
+                    db.Restaurant.Add(restaurant);
+                    db.SaveChanges();
+                    succeded = true; // if database gives no error, it works
+                }
+                catch { }
 
+                // If true, it works
+                Assert.IsTrue(succeded);
+           
             }
         }
         [TestMethod]
@@ -62,7 +83,6 @@ namespace UnitTestAPI
             {
                 int id = 1;
 
-                //TODO: fixa modellerna
                 List<Restaurant> temprestaurants = new List<Restaurant>();
                 List<Restaurant> restaurants = new List<Restaurant>();
                 List<FavoritesRestaurants> FavoriteRestaurants = db.FavoritesRestaurants.Where(uid => uid.User_id == id).ToList();
