@@ -35,15 +35,12 @@ namespace OnlineFoodAPI.Controllers
                     }
                 }
             }
-            catch (Exception e)
+            catch 
             {
                
             }
-
             // Return null if invalid or failed
             return null;
-      
-
         }
     }
 }

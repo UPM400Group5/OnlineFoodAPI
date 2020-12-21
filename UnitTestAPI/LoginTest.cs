@@ -2,6 +2,7 @@
 using System;
 using OnlineFoodAPI.Controllers;
 using OnlineFoodAPI.Models;
+using System.Linq;
 
 namespace UnitTestAPI
 {
@@ -12,31 +13,34 @@ namespace UnitTestAPI
             [TestMethod]
             public void FailedLogin()
             {
-                LoginModel model = new LoginModel();
-                model.password = "12345";
-                model.username = "Admin";
+                using (OnlineFoodDatabaseModel db = new OnlineFoodDatabaseModel()) 
+                {
+                    LoginModel model = new LoginModel();
+                    model.password = "123456";
+                    model.username = "Admin";
 
-                LoginController loginController = new LoginController();
+                    var result = db.User.Where(x => x.username == model.username && x.password == model.password).FirstOrDefault();
 
-                var result = loginController.LoginUser(model);
-
-                // Should be null if failed
-                Assert.AreEqual(null, result);
+                    // Should be null if failed
+                    Assert.AreEqual(null, result);
+                } 
             }
+
             [TestMethod]
             public void SuccessfulLogin()
             {
-                LoginModel model = new LoginModel();
-                model.password = "123456";
-                model.username = "potionseller";
-         
-                LoginController loginController = new LoginController();
+                using (OnlineFoodDatabaseModel db = new OnlineFoodDatabaseModel())
+                {
+                    LoginModel model = new LoginModel();
+                    model.password = "123456";
+                    model.username = "potionseller";
 
-                var result = loginController.LoginUser(model);
+                    var result = db.User.Where(x => x.username == model.username && x.password == model.password).FirstOrDefault();
 
-                // A object is returned if successfull, if not then it failed
-                Assert.AreEqual(model.username, result.username);
-             }
+                    // An object of user is returned if successfull, if not then it failed
+                    Assert.AreEqual(model.username, result.username);
+                }
+            }
            
              
             
