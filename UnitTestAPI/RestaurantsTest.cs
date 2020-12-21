@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using UnitTestAPI.Models;
 
@@ -15,8 +16,9 @@ namespace UnitTestAPI
             bool succeded = false;
             using (OnlineFoodDatabaseModel db = new OnlineFoodDatabaseModel())
             {
+                // Will create a new object
                 Restaurant restaurant = new Restaurant { 
-                    name = "Max", 
+                    name = "MaxUnitTest", 
                     adress = "Storgatan 43", 
                     city = "Trollhättan", 
                     delivery_price = 65, 
@@ -40,18 +42,55 @@ namespace UnitTestAPI
         [TestMethod]
         public void UpdateRestaurant()
         {
+            bool succeded = false;
+
             using (OnlineFoodDatabaseModel db = new OnlineFoodDatabaseModel())
             {
+                Restaurant restaurant = new Restaurant
+                {
+                    id = 3,
+                    name = "MaxUnitTest",
+                    adress = "Storgatan 43",
+                    city = "Göteborg",
+                    delivery_price = 65,
+                    email = "Max@gmail.com",
+                    phonenumber = "34556352342"
+                };
 
+                try
+                {
+                    db.Entry(restaurant).State = EntityState.Modified;
+                    db.SaveChanges();
+                    succeded = true;
+                }
+                catch { }
+
+                Assert.IsTrue(succeded);
             }
+                
         }
         [TestMethod]
         public void DeleteRestaurant()
         {
-            using (OnlineFoodDatabaseModel db = new OnlineFoodDatabaseModel())
-            {
+            bool succeded = false;
 
+            try
+            {
+                using (OnlineFoodDatabaseModel db = new OnlineFoodDatabaseModel())
+                {
+                    // Unit test code... The row beneath just finds an id to use in the actual code that is used in API project
+                    int id = db.Restaurant.Where(x => x.name == "MaxUnitTest").FirstOrDefault().id;
+
+                    // Code logic used in API project below:
+                    Restaurant restaurant = db.Restaurant.Find(id);
+
+                    db.Restaurant.Remove(restaurant);
+                    db.SaveChanges();
+                    succeded = true;
+                }
             }
+            catch { }
+            Assert.IsTrue(succeded);
         }
         [TestMethod]
         public void RestaurantSorted()
