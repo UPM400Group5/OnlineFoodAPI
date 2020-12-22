@@ -21,13 +21,7 @@ namespace OnlineFoodAPI.Controllers
         [Route("restaurant/all")]
         public List<Restaurant> GetRestaurant()
         {
-            List<Restaurant> restList = db.Restaurant.ToList(); //adds all restaurangs 
-            foreach(var item in restList)
-            {
-                item.Dishes = db.Dishes.Where(e => e.Restaurant_id == item.id).ToList();
-
-            }
-            return restList;
+            return db.Restaurant.ToList(); 
         }
 
         [Route("restaurant/specific/{id}")]
