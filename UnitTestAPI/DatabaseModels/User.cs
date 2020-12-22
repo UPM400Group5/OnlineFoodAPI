@@ -1,6 +1,5 @@
-namespace OnlineFoodAPI
+namespace UnitTestAPI
 {
-    using OnlineFoodAPI.Models;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
@@ -14,7 +13,6 @@ namespace OnlineFoodAPI
         public User()
         {
             Restaurant = new HashSet<Restaurant>();
-            Dishes = new HashSet<Dishes>();
         }
 
         public int id { get; set; }
@@ -44,11 +42,6 @@ namespace OnlineFoodAPI
         public string city { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public ICollection<Restaurant> Restaurant { get; set; }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public ICollection<Dishes> Dishes { get; set; }
-        public IList<FavoritesRestaurants> FavoritesRestaurants { get; set; }
-
+        public virtual ICollection<Restaurant> Restaurant { get; set; }
     }
 }

@@ -481,11 +481,19 @@
             </summary>
             <param name="documentPath">The physical path to XML document.</param>
         </member>
-        <member name="M:OnlineFoodAPI.Controllers.ValuesController.Get(System.Int32)">
+        <member name="M:OnlineFoodAPI.Controllers.RestaurantsController.GetSortedCity(System.String)">
             <summary>
-            Looks up some data by ID.
+            Get all restaurants from a city
             </summary>
-            <param name="id">The ID of the data.</param>
+            <param name="city">Name of city</param>
+            <returns>Restaurants</returns>
+        </member>
+        <member name="M:OnlineFoodAPI.Controllers.RestaurantsController.GetRestaurantDishes(System.Int32)">
+            <summary>
+            Get list of dishes from a restaurant by id
+            </summary>
+            <param name="id">Id of restaurant</param>
+            <returns>Dishes</returns>
         </member>
     </members>
 </doc>

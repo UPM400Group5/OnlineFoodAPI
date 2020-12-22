@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
 
-namespace OnlineFoodAPI.Models
+namespace UnitTestAPI.Models
 {
     [Table("FavoritesRestaurants")]
     public class FavoritesRestaurants

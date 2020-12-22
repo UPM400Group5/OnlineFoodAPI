@@ -1,6 +1,5 @@
-namespace OnlineFoodAPI
+namespace UnitTestAPI
 {
-    using OnlineFoodAPI.Models;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
@@ -23,7 +22,6 @@ namespace OnlineFoodAPI
         public string name { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public ICollection<Dishes> Dishes { get; set; }
-        public IList<DishesIngredient> DishesIngredient { get; set; }
+        public virtual ICollection<Dishes> Dishes { get; set; }
     }
 }

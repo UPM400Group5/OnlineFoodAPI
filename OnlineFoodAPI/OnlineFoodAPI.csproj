@@ -34,7 +34,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>App_Data/XmlDocument.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -165,11 +164,9 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\IngredientsController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
-    <Compile Include="Controllers\OrderController.cs" />
     <Compile Include="Controllers\RestaurantsController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
-    <Compile Include="Models\CustomOrder.cs" />
     <Compile Include="Models\DatabaseFoodOnlineEntityModel.cs" />
     <Compile Include="Models\Dishes.cs" />
     <Compile Include="Global.asax.cs">
@@ -179,7 +176,6 @@
     <Compile Include="Models\FavoritesRestaurants.cs" />
     <Compile Include="Models\Ingredient.cs" />
     <Compile Include="Models\LoginModel.cs" />
-    <Compile Include="Models\OrderModel.cs" />
     <Compile Include="Models\ReceiptModel.cs" />
     <Compile Include="Models\UserModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -216,9 +212,6 @@
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\CollectionModelDescription.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
-    <Content Include="..\.editorconfig">
-      <Link>.editorconfig</Link>
-    </Content>
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
     <Content Include="Scripts\jquery-3.4.1.min.js" />

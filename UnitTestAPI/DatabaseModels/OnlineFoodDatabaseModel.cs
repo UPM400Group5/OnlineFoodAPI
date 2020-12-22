@@ -1,15 +1,15 @@
-using OnlineFoodAPI.Models;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
 using System.Linq;
+using UnitTestAPI.Models;
 
-namespace OnlineFoodAPI
+namespace UnitTestAPI
 {
-    public partial class DatabaseFoodOnlineEntityModel : DbContext
+    public partial class OnlineFoodDatabaseModel : DbContext
     {
-        public DatabaseFoodOnlineEntityModel()
-            : base("name=DatabaseFoodOnlineEntityModel")
+        public OnlineFoodDatabaseModel()
+            : base("name=OnlineFoodUnitTestDatabaseModel")
         {
         }
 
@@ -72,11 +72,11 @@ namespace OnlineFoodAPI
                 .Property(e => e.name)
                 .IsUnicode(false);
 
-            modelBuilder.Entity<Restaurant>() 
+            modelBuilder.Entity<Restaurant>()
                 .HasMany(e => e.Dishes)
                 .WithRequired(e => e.Restaurant)
                 .HasForeignKey(e => e.Restaurant_id)
-                .WillCascadeOnDelete(false); 
+                .WillCascadeOnDelete(false);
 
             /*modelBuilder.Entity<Restaurant>()
                 .HasMany(e => e.User)
@@ -110,8 +110,6 @@ namespace OnlineFoodAPI
             modelBuilder.Entity<User>()
                 .Property(e => e.city)
                 .IsUnicode(false);
-
-
         }
     }
 }

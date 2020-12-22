@@ -18,13 +18,19 @@ namespace OnlineFoodAPI.Controllers
         private DatabaseFoodOnlineEntityModel db = new DatabaseFoodOnlineEntityModel();
 
         [HttpGet]
-        [Route("restaurants/all")]
-        public IQueryable<Restaurant> GetRestaurant()
+        [Route("restaurant/all")]
+        public List<Restaurant> GetRestaurant()
         {
-            return db.Restaurant;
+            List<Restaurant> restList = db.Restaurant.ToList(); //adds all restaurangs 
+            foreach(var item in restList)
+            {
+                item.Dishes = db.Dishes.Where(e => e.Restaurant_id == item.id).ToList();
+
+            }
+            return restList;
         }
 
-        [Route("restaurants/specific/{id}")]
+        [Route("restaurant/specific/{id}")]
         [ResponseType(typeof(Restaurant))]
         public IHttpActionResult GetRestaurant(int id)
         {
@@ -33,55 +39,45 @@ namespace OnlineFoodAPI.Controllers
             {
                 return NotFound();
             }
+            restaurant.Dishes = db.Dishes.Where(e => e.Restaurant_id == restaurant.id).ToList();
 
             return Ok(restaurant);
         }
 
-
-
         [Route("restaurant/getfavrest/{userid}")]
         // GET: all favourite dishes by sending userid
-        public List<Restaurant> GetFavouriteRestaurant(int userid)
+        public List<Restaurant> GetFavouriteRestaurant(int userid) //get the users from header userid, to see which favourite restaurant the user has. 
         {
-            List<Restaurant> temprestaurants = new List<Restaurant>();
-            List<Restaurant> restaurants = new List<Restaurant>();
-            List<FavoritesRestaurants> FavoriteRestaurants = db.FavoritesRestaurants.Where(uid => uid.User_id == userid).ToList();
-            if (FavoriteRestaurants.Count != 0)
+            List<Restaurant> temprestaurants = new List<Restaurant>(); //make a list of restaurants
+            List<Restaurant> restaurants = new List<Restaurant>(); //the list we are returning
+            List<FavoritesRestaurants> FavoriteRestaurants = db.FavoritesRestaurants.Where(uid => uid.User_id == userid).ToList(); //see all favourite restraurants the user has.
+            if (FavoriteRestaurants.Count != 0) //see so the list has objects in it
             {
-                foreach (var item in FavoriteRestaurants)
+                foreach (var item in FavoriteRestaurants) 
                 {
                     Restaurant restaurant = new Restaurant();
-                    temprestaurants.Add(db.Restaurant.Where(fr => fr.id == item.Restaurant_id).FirstOrDefault());
+                    temprestaurants.Add(db.Restaurant.Where(fr => fr.id == item.Restaurant_id).FirstOrDefault()); //add restaurant id 
                 }
             }
             foreach(var item in temprestaurants)
             {
-                Restaurant restaurant = new Restaurant();
-                restaurant.id = item.id;
-                restaurant.name = item.name;
-                restaurant.adress = item.adress;
-                restaurant.city = item.city;
-                restaurant.delivery_price = item.delivery_price;
-                restaurant.Dishes= item.Dishes;
-                restaurants.Add(restaurant);
-
-
+                item.User = null; //so that the data isnt recursive
+                item.FavoritesRestaurants = null; //so that the data isnt recursive
+                List<Dishes> tempdish = db.Dishes.Where(e => e.Restaurant_id == item.id).ToList(); // Adds the restaurant.dishes so frontend can use it directly
+                item.Dishes = tempdish; 
+                restaurants.Add(item); //adds the object to the list ready for return
             }
             return restaurants;
         }
 
-        // PUT: api/Restaurants/5
+        [HttpPut]
+        [Route("restaurant/update")]
         [ResponseType(typeof(void))]
-        public IHttpActionResult PutRestaurant(int id, Restaurant restaurant)
+        public IHttpActionResult PutRestaurant(Restaurant restaurant) //sends in object in body
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
-            }
-
-            if (id != restaurant.id)
-            {
-                return BadRequest();
             }
 
             db.Entry(restaurant).State = EntityState.Modified;
@@ -92,7 +88,7 @@ namespace OnlineFoodAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!RestaurantExists(id))
+                if (!RestaurantExists(restaurant.id))
                 {
                     return NotFound();
                 }
@@ -102,7 +98,7 @@ namespace OnlineFoodAPI.Controllers
                 }
             }
 
-            return StatusCode(HttpStatusCode.NoContent);
+            return StatusCode(HttpStatusCode.OK);
         }
 
         [HttpPost] 
@@ -121,29 +117,29 @@ namespace OnlineFoodAPI.Controllers
             return CreatedAtRoute("DefaultApi", new { id = restaurant.id }, restaurant);
         }
 
+        /// <summary>
+        /// Get all restaurants from a city
+        /// </summary>
+        /// <param name="city">Name of city</param>
+        /// <returns>Restaurants</returns>
         [HttpGet]
         [Route("restaurant/sort/{city}")]
         public List<Restaurant> GetSortedCity(string city)
         {
-            List<Restaurant> restaurantsList = new List<Restaurant>();
-            var restaurants = db.Restaurant.Where(x => x.city.ToLower() == city.ToLower()).ToList();
-
-            foreach (var item in restaurants)
-            {
-                Restaurant temp = new Restaurant();
-
-                temp.city = item.city;
-                temp.delivery_price = item.delivery_price;
-                temp.adress = item.adress;
-                temp.id = item.id;
-                temp.name = item.name;
-
-                restaurantsList.Add(temp);
-            }
-
-            return restaurantsList;
+            return db.Restaurant.Where(x => x.city.ToLower() == city.ToLower()).ToList();
         }
 
+        /// <summary>
+        /// Get list of dishes from a restaurant by id
+        /// </summary>
+        /// <param name="id">Id of restaurant</param>
+        /// <returns>Dishes</returns>
+        [HttpGet]
+        [Route("restaurant/dishes/{id}")]
+        public List<Dishes> GetRestaurantDishes(int id)
+        {
+            return db.Dishes.Where(x => x.Restaurant_id == id).ToList(); 
+        }
 
         // DELETE: api/Restaurants/5
         [ResponseType(typeof(Restaurant))]
