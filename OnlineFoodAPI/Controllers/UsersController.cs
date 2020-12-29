@@ -108,7 +108,7 @@ namespace OnlineFoodAPI.Controllers
             db.User.Add(user); //add user to db
             db.SaveChanges();
 
-            return CreatedAtRoute("DefaultApi", new { id = user.id }, user);
+            return Ok(user);
         }
 
         #region FAVOURITE RESTAURANTS

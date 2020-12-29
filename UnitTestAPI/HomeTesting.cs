@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using NUnit.Framework;
 using OnlineFoodAPI.Controllers;
 using System;
 using System.Collections.Generic;
@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 
 namespace UnitTestAPI
 {
-    [TestClass]
     public class HomeTesting
     {
-        [TestMethod]
+        [Test]
         public void TestHomeAsync()
         {
             var controller = new HomeController();
             var result = controller.Index();
-            Assert.IsInstanceOfType(result, typeof(System.Web.Mvc.ViewResult));
+            Assert.IsInstanceOf< System.Web.Mvc.ViewResult> (result);
+
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using NUnit.Framework;
 using OnlineFoodAPI.Models;
 using System.Linq;
 using OnlineFoodAPI.Controllers;
@@ -6,10 +6,9 @@ using OnlineFoodAPI;
 
 namespace UnitTestAPI
 {
-    [TestClass]
     public class LoginTest
     {
-        [TestMethod]
+        [Test]
         public void FailedLogin_ReturnsNull()
         {
             var controller = new LoginController();
@@ -21,7 +20,7 @@ namespace UnitTestAPI
             Assert.IsNull(result);
         }
 
-        [TestMethod]
+        [Test]
         public void SuccessfulLogin_ReturnsModelNotNull()
         {
             var controller = new LoginController();

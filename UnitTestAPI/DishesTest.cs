@@ -1,12 +1,11 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using NUnit.Framework;
 using System;
 
 namespace UnitTestAPI
 {
-    [TestClass]
     public class DishesTest
     {
-        [TestMethod]
+        [Test]
         public void TestMethod1()
         {
         }
