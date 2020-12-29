@@ -137,7 +137,7 @@ namespace UnitTestAPI
             User user = GetNonExistingUser();
       
             IHttpActionResult actionResult = controller.PutUser(user.id, user);
-            Assert.IsInstanceOf<BadRequestErrorMessageResult>(actionResult);
+            Assert.IsInstanceOf<NotFoundResult>(actionResult);
         }
         public void UpdateUser_BadRequestModelNotValid()
         {
@@ -153,9 +153,8 @@ namespace UnitTestAPI
         {
             user.city = "Göteborg";          
             IHttpActionResult actionResult = controller.PutUser(user.id, user);
-            var contentResult = actionResult as NegotiatedContentResult<User>;
 
-            Assert.AreEqual(System.Net.HttpStatusCode.Accepted, contentResult.StatusCode);
+            Assert.IsInstanceOf<OkNegotiatedContentResult<string>>(actionResult);
         }
 
 

@@ -86,7 +86,7 @@ namespace OnlineFoodAPI.Controllers
                     throw;
                 }
             }
-            return StatusCode(HttpStatusCode.NoContent);
+            return Ok("user updated");
         }
 
 
