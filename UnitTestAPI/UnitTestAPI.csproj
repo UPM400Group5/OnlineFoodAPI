@@ -70,19 +70,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DatabaseModels\Dishes.cs" />
-    <Compile Include="DatabaseModels\DishesIngredient.cs" />
-    <Compile Include="DatabaseModels\FavoritesRestaurants.cs" />
-    <Compile Include="DatabaseModels\Ingredient.cs" />
     <Compile Include="LoginTest.cs" />
-    <Compile Include="DatabaseModels\OnlineFoodDatabaseModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="DatabaseModels\DishesTest.cs" />
-    <Compile Include="DatabaseModels\Restaurant.cs" />
     <Compile Include="RestaurantsTest.cs" />
     <Compile Include="IngredientTest.cs" />
-    <Compile Include="DatabaseModels\User.cs" />
     <Compile Include="DishesTest.cs" />
+    <Compile Include="TestAPIAppContext.cs" />
     <Compile Include="UserTest.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -52,7 +52,7 @@ namespace OnlineFoodAPI.Controllers
         [ResponseType(typeof(void))]
         public IHttpActionResult PutUser(int id, User user) //id is from header of api, user is sent from body
         {
-            user = db.User.Find(id); //find user from id
+            //user = db.User.Find(id); //find user from id
             if (!ModelState.IsValid) //check if the model is valid
             {
                 return BadRequest(ModelState);
