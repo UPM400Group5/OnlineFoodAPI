@@ -183,14 +183,6 @@ namespace OnlineFoodAPI.Controllers
             return Ok(user);
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
 
         private bool UserExists(int id)
         {

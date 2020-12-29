@@ -108,7 +108,7 @@ namespace OnlineFoodAPI.Controllers
             db.Restaurant.Add(restaurant);
             db.SaveChanges();
 
-            return CreatedAtRoute("DefaultApi", new { id = restaurant.id }, restaurant);
+            return Ok("Created restaurant! " + restaurant.name);
         }
 
         /// <summary>
@@ -135,7 +135,7 @@ namespace OnlineFoodAPI.Controllers
             return db.Dishes.Where(x => x.Restaurant_id == id).ToList(); 
         }
 
-        [HttpDelete]
+        [HttpDelete] 
         [Route("restaurant/{id}")]
         [ResponseType(typeof(Restaurant))]
         public IHttpActionResult DeleteRestaurant(int id)
@@ -145,6 +145,11 @@ namespace OnlineFoodAPI.Controllers
             {
                 return NotFound();
             }
+            List<FavoritesRestaurants> restlist = db.FavoritesRestaurants.Where(e => e.Restaurant_id == id).ToList(); //removes each restaurant from db so no foreign keys are left.
+            foreach(var item in restlist)
+            {
+                db.FavoritesRestaurants.Remove(item);
+            }
 
             db.Restaurant.Remove(restaurant);
             db.SaveChanges();
@@ -152,14 +157,6 @@ namespace OnlineFoodAPI.Controllers
             return Ok(restaurant);
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
 
         private bool RestaurantExists(int id)
         {
