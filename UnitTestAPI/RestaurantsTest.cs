@@ -9,10 +9,6 @@ namespace UnitTestAPI
     [TestClass]
     public class RestaurantsTest
     {
-      [TestMethod]
-      public void ReadRestaurants() 
-      {
 
-      }
     }
 }

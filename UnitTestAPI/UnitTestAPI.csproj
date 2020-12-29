@@ -75,6 +75,7 @@
     <Compile Include="RestaurantsTest.cs" />
     <Compile Include="IngredientTest.cs" />
     <Compile Include="DishesTest.cs" />
+    <Compile Include="TestAPIAppContext.cs" />
     <Compile Include="UserTest.cs" />
   </ItemGroup>
   <ItemGroup>
