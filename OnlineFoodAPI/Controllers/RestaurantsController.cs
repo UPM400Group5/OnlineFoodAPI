@@ -135,7 +135,8 @@ namespace OnlineFoodAPI.Controllers
             return db.Dishes.Where(x => x.Restaurant_id == id).ToList(); 
         }
 
-        // DELETE: api/Restaurants/5
+        [HttpDelete]
+        [Route("restaurant/{id}")]
         [ResponseType(typeof(Restaurant))]
         public IHttpActionResult DeleteRestaurant(int id)
         {
