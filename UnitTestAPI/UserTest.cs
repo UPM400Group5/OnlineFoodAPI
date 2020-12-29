@@ -9,8 +9,6 @@ namespace UnitTestAPI
     [TestClass]
     public class UserTest
     {
-        OnlineFoodAPI.Controllers.UsersController controller = new OnlineFoodAPI.Controllers.UsersController();
-
         [TestMethod] 
         public void OnlineFoodAPI_UserCRUD() 
         {
