@@ -16,11 +16,9 @@ namespace UnitTestAPI
 
             var login = GetWrongUserLogin();
 
-            var result =
-                controller.LoginUser(login);
+            var result = controller.LoginUser(login);
 
             Assert.IsNull(result);
-     
         }
 
         [TestMethod]
@@ -28,10 +26,10 @@ namespace UnitTestAPI
         {
             var controller = new LoginController();
             var login = GetRightUserLogin();
-            var result =
-                controller.LoginUser(login);
-            Assert.IsNotNull(result);
             
+            var result = controller.LoginUser(login);
+
+            Assert.IsNotNull(result);
         }
         LoginModel GetWrongUserLogin()
         {
@@ -41,7 +39,5 @@ namespace UnitTestAPI
         {
             return new LoginModel() { username = "potionseller", password = "123456" };
         }
-
-
     }
 }

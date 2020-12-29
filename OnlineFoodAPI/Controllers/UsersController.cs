@@ -58,13 +58,13 @@ namespace OnlineFoodAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (id != user.id) //se if sent id is the same as user. If user is null you wont be sent past.
+            if (id != user.id) //see if sent id is the same as user
             {
                 return BadRequest("Cant find user");
             }
 
             // If password length is less than 6, dont continue
-            if (user.password.Length <= 6) 
+            if (user.password.Length < 6) 
             {
                 return BadRequest("Password length is less than 6");
             }
@@ -75,7 +75,7 @@ namespace OnlineFoodAPI.Controllers
             {
                 db.SaveChanges();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException e)
             {
                 if (!UserExists(id)) //if user doesnt exist with the id
                 {
@@ -100,7 +100,7 @@ namespace OnlineFoodAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (user.password.Length <= 6)  //check if password length is less than 6
+            if (user.password.Length < 6)  //check if password length is less than 6
             {
                 return BadRequest("Password length is less than 6");
             }
@@ -195,8 +195,6 @@ namespace OnlineFoodAPI.Controllers
         private bool UserExists(int id)
         {
             return db.User.Count(e => e.id == id) > 0;
-        }
-
-        
+        }   
     }
 }
