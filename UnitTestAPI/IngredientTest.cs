@@ -54,6 +54,15 @@ namespace UnitTestAPI
             Assert.IsInstanceOf<StatusCodeResult>(actionresult);
 
         }
+        [Test]
+        public void PostIngredient_BadModel() //has to .name each time.
+        {
+            Ingredient demoing = GetDemoBadPutIngredient();
+            controller.ModelState.AddModelError("test", "test");
+            string actionresult = controller.PostIngredient(demoing);
+            Assert.IsInstanceOf<string>(actionresult);
+
+        }
 
 
         [Test]

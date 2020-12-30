@@ -29,7 +29,7 @@ namespace OnlineFoodAPI.Controllers
                 {
                     List<Ingredient> temping = new List<Ingredient>();
                     List<DishesIngredient> ingredientlist = db.DishesIngredient.Where(e => e.Dishes_id == item.id).ToList(); //find every dish that has an id connected to each dish from dbo.DishesIngredient
-                    foreach (var item2 in ingredientlist) 
+                    foreach (var item2 in ingredientlist)
                     {
                         Ingredient ingridienttemp = db.Ingredient.Find(item2.Ingredient_id); //find each ingredient to make an object out of it.
                         ingridienttemp.Dishes = null; //so the data isnt recursive
@@ -41,7 +41,7 @@ namespace OnlineFoodAPI.Controllers
 
                 }
             }
-            catch (Exception e){}
+            catch (Exception e) { }
             return alldishes;
         }
 
@@ -53,17 +53,17 @@ namespace OnlineFoodAPI.Controllers
             if (checkifadmin.role != "admin")
             {
                 return "User is not a admin"; //returns error if false.
-            } 
+            }
             if (id != dishes.id)
             {
-                return "id doesnt extist";
+                return "id doesnt exist";
             }
             if (dishes.specialprice == null || dishes.specialprice == 0) //Checks if price is changed after specialprice is
             {
                 Dishes dish = db.Dishes.Find(dishes.id);
                 if (dishes.price != dish.price)
                 {
-                    return "Remove specialprice before changing normal price"; 
+                    return "Remove specialprice before changing normal price";
                 }
             }
             try
@@ -74,7 +74,10 @@ namespace OnlineFoodAPI.Controllers
                 db.SaveChanges();
                 //We delete to create.
             }
-            catch{}
+            catch
+            {
+                return "There was no ingredient attached";
+            }
             try
             {
                 foreach (var item in dishes.Ingredient) //now we adding what we deleted, just renewed to the current models ingredients.
@@ -96,33 +99,34 @@ namespace OnlineFoodAPI.Controllers
                     DishesIngredient tempdishtoaddtotable = new DishesIngredient(); //Create new dishesingredient 
                     tempdishtoaddtotable.Dishes_id = dishes.id;
                     tempdishtoaddtotable.Ingredient_id = ing_id.id;
-                    db.DishesIngredient.Add(tempdishtoaddtotable); // Ad to dbo.dishesingredient with the new dish_id and Ingredient_id
-                    db.SaveChanges();
+                    db.DishesIngredient.Add(tempdishtoaddtotable); // Add to dbo.dishesingredient with the new dish_id and Ingredient_id
                 }
             }
-            catch { }
-            try  //Now we have to update the object.
+            catch(Exception e) { }
+            /*try  //Now we have to update the object.
             {
-                var activityinDb = db.Dishes.Find(dishes.id); 
-                if(activityinDb == null)
+                var activityinDb = db.Dishes.Find(dishes.id);
+                if (activityinDb == null)
                 {
                     db.Dishes.Add(dishes);
                     db.SaveChanges();
                 }
-                activityinDb.name  = dishes.name;
+                activityinDb.name = dishes.name;
                 activityinDb.price = dishes.price;
                 //activityinDb.Ingredient = temping; //NEVER UPDATE THIS DB WITH INGREDIENT [saving this for error that can be found later]
                 activityinDb.Restaurant_id = dishes.Restaurant_id;
                 activityinDb.Restaurant = db.Restaurant.Find(dishes.Restaurant_id); //restaurang is an object so we search for the id in dbo.restaurang
                 activityinDb.specialprice = dishes.specialprice;
                 db.Entry(activityinDb).State = EntityState.Modified;  //Db knows what to update.
-                db.SaveChanges();
-            }
+
+            } 
             catch (DbUpdateConcurrencyException)
             {
-                if (!DishesExists(id)){return "dish doesnt exist";} //if the dish doesnt exist
-                else{throw;}
-            } return "updated";
+                if (!DishesExists(id)) { return "dish doesnt exist"; } //if the dish doesnt exist
+                else { throw; }
+            } */
+            db.SaveChanges();
+            return "updated";
         }
         [Route("dishes/getspecificdish/{id}")]
         // GET: specificDish by sending id
@@ -138,9 +142,9 @@ namespace OnlineFoodAPI.Controllers
             {
                 List<Ingredient> temping = new List<Ingredient>();
                 List<DishesIngredient> ingredientlist = db.DishesIngredient.Where(e => e.Dishes_id == dishes.id).ToList(); //adds ingredient that are associated by dbo.DishesIngredient
-                foreach (var item in ingredientlist) 
+                foreach (var item in ingredientlist)
                 {
-                    Ingredient ingridienttemp = db.Ingredient.Find(item.Ingredient_id); 
+                    Ingredient ingridienttemp = db.Ingredient.Find(item.Ingredient_id);
                     ingridienttemp.Dishes = null; //make them null to not send it recursive data
                     ingridienttemp.DishesIngredient = null; //make them null to not send it recursive data
                     temping.Add(ingridienttemp); //Add ingredient tempinglist associated to the dish.ingredient.
@@ -186,13 +190,24 @@ namespace OnlineFoodAPI.Controllers
                 return BadRequest("User is not a admin"); //return if the user isnt admin
             }
             if (!ModelState.IsValid) //check if the model is valid
-            { 
+            {
                 return BadRequest(ModelState);
             }
             foreach (var item in dishes.Ingredient) //have to specifiy id of each ingredient sent in with the model
             {
+
                 Ingredient tempingre = db.Ingredient.Where(e => e.name == item.name).FirstOrDefault(); //check the ingredient in dbo.ingredient, since user only sends in ingredientName
+                if (tempingre == null)
+                {
+                    db.Ingredient.Add(item);
+                    db.SaveChanges();
+                    tempingre = db.Ingredient.Where(e => e.name == item.name).FirstOrDefault();
+                }
+
                 item.id = tempingre.id; //taken id from above is set to the ingredient object(item).
+
+
+
             }
             Dishes tempdish1 = new Dishes(); //make a temporary dish
             tempdish1.name = dishes.name;
@@ -206,7 +221,8 @@ namespace OnlineFoodAPI.Controllers
             db.Dishes.Add(tempdish1); //First add dish to dishes 
             db.SaveChanges();
 
-            Dishes tempdish = db.Dishes.Where(e => e.name == dishes.name).FirstOrDefault(); //Search for the id of the dish we just saved in DB, since we didnt have it before we created it.
+            List<Dishes> tempdishlist = db.Dishes.Where(e => e.name == dishes.name).ToList();
+            Dishes tempdish = tempdishlist[tempdishlist.Count() - 1]; //Search for the id of the dish we just saved in DB, since we didnt have it before we created it.
             dishes.id = tempdish.id;
             foreach (var item in dishes.Ingredient) //saving each dish_id and ingredient_id to dbo.DishesIngredient
             {
@@ -215,6 +231,10 @@ namespace OnlineFoodAPI.Controllers
                 tempdishing.Dishes_id = dishes.id;
                 List<DishesIngredient> checkifexistlist = db.DishesIngredient.Where(e => e.Dishes_id == tempdishing.Dishes_id).ToList(); //searches dbo.dishesingredient to see if it already exists.
                 List<int> tempIngredientID = new List<int>(); //temporary list of ingredientIDs
+                foreach(var intitem in checkifexistlist)
+                {
+                    tempIngredientID.Add(item.id);
+                }
                 bool addtodb = true; //bool to see if we should continue and that there are no overlapping ingredients.
                 foreach (var item2 in checkifexistlist)
                 {
@@ -236,11 +256,11 @@ namespace OnlineFoodAPI.Controllers
                     }
                 }
             }
-            return CreatedAtRoute("DefaultApi", new { id = dishes.id }, dishes);
+            return Ok("Succesfully added new dish");
         }
 
         [HttpDelete]
-        [Route("dishes/delete/{dishid}/{userid}")]  
+        [Route("dishes/delete/{dishid}/{userid}")]
         [ResponseType(typeof(Dishes))]
         public IHttpActionResult DeleteDishes(int dishid, int userid)
         {
@@ -256,30 +276,19 @@ namespace OnlineFoodAPI.Controllers
             }
 
             List<DishesIngredient> tempdishing = db.DishesIngredient.Where(e => e.Dishes_id == dishid).ToList(); //add all dishesingredient from dbo.dishesingredient that has dish_id as dishid sent in header
-            if (tempdishing != null)
+            if (tempdishing.Count != 0)
             {
-                foreach(var item in tempdishing) //each dishingredient in tempdishing list
+                foreach (DishesIngredient item in tempdishing) //each dishingredient in tempdishing list
                 {
                     db.DishesIngredient.Remove(item); //removes all rows where item(dishingredient with dish_id == dishid) exists.
 
                 }
-                db.SaveChanges(); //savechanges after all rows are deleted
-
             }
 
             db.Dishes.Remove(dishes); //then we can remove the dish from dbo.dishes since there is not conflict of foreign key
             db.SaveChanges();
 
             return Ok(dishes); //return the deleted dish
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
         }
 
         private bool DishesExists(int id)
