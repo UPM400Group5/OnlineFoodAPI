@@ -16,23 +16,24 @@ namespace UnitTestAPI
         Restaurant restaurant;
         RestaurantsController controller = new RestaurantsController();
 
-        User user;
-        UsersController userController = new UsersController();
+        //User user;
+        //UsersController userController = new UsersController();
 
         [SetUp]
         public void Setup()
         {
-            restaurant = GetNewMockupRestaurant();
-            var result = controller.PostRestaurant(restaurant);
-            List<Restaurant> listRestaurant = controller.GetRestaurant();
-            var tempRestaurant = listRestaurant[(listRestaurant.Count() - 1)];
-            restaurant.id = tempRestaurant.id;
+            try
+            {
+                restaurant = GetNewMockupRestaurant();
+                var result = controller.PostRestaurant(restaurant);
+                List<Restaurant> listRestaurant = controller.GetRestaurant();
+                var tempRestaurant = listRestaurant[(listRestaurant.Count() - 1)];
+                restaurant.id = tempRestaurant.id;
+            }
+            catch (Exception e)
+            {
 
-            user = GetNewMockupUser();
-            var userResult = userController.PostUser(user);
-            List<User> listuser = userController.GetAllUsers(2).ToList();
-            var tempuser = listuser[(listuser.Count() - 1)];
-            user.id = tempuser.id;
+            }
         }
 
         [TearDown]
@@ -43,15 +44,11 @@ namespace UnitTestAPI
                 controller.ModelState.Clear();
                 var result =
                     controller.DeleteRestaurant(restaurant.id);
-
-                controller.ModelState.Clear();
-                var userResult =
-                    userController.DeleteUser(user.id);
             }
             catch (Exception e)
             {
 
-            }
+            }         
         }
 
         #region Create
@@ -68,7 +65,9 @@ namespace UnitTestAPI
         [Test]
         public void PostRestaurant_Successfully()
         {
+
             IHttpActionResult actionResult = controller.PostRestaurant(restaurant);
+            controller.DeleteRestaurant(restaurant.id);
             Assert.IsInstanceOf<OkNegotiatedContentResult<string>>(actionResult);
         }
         #endregion
@@ -98,12 +97,9 @@ namespace UnitTestAPI
         [Test]
         public void GetFavouriteRestaurant_Successfully()
         {
-            // Add favorite first
-            userController.AddFavRest(user.id, restaurant.id);
-
             // Get list
-            var list = controller.GetFavouriteRestaurant(user.id);
-            Assert.IsTrue(list != null);
+            var list = controller.GetFavouriteRestaurant(1);
+            Assert.IsNotNull(list);
         }
 
         [Test]
@@ -133,8 +129,8 @@ namespace UnitTestAPI
         [Test]
         public void UpdateRestaurant_Successfully()
         {
-            // New name
-            restaurant.name = "Alberts";
+
+            restaurant.city = "Malmö";
             IHttpActionResult actionResult = controller.PutRestaurant(restaurant);
 
             var message = actionResult as StatusCodeResult;
@@ -147,6 +143,7 @@ namespace UnitTestAPI
         {
             Restaurant temp = GetNoneExistingRestaurant();
             IHttpActionResult actionResult = controller.PutRestaurant(temp);
+
             Assert.IsInstanceOf<NotFoundResult>(actionResult);
         }
         [Test]
