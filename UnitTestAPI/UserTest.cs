@@ -39,7 +39,11 @@ namespace UnitTestAPI
             catch (Exception e)
             {
 
+<<<<<<< Updated upstream
             }
+=======
+            }   
+>>>>>>> Stashed changes
         }
         [Test]
         public void GetUsersNotAdmin_ReturnsNull()
@@ -141,7 +145,6 @@ namespace UnitTestAPI
             Assert.IsInstanceOf<InvalidModelStateResult>(actionResult);
         }
 
-        //TODO: Update fungerar ej
         [Test]
         public void UpdateUser_ReturnsAccepted() 
         {
