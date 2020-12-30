@@ -26,7 +26,6 @@ namespace UnitTestAPI
             List<User> listuser = controller.GetAllUsers(2).ToList();
             var tempuser = listuser[(listuser.Count() - 1)];
             user.id = tempuser.id;
-
         }
         [TearDown]
         public void Teardown()
@@ -41,8 +40,6 @@ namespace UnitTestAPI
             {
 
             }
-           
-
         }
         [Test]
         public void GetUsersNotAdmin_ReturnsNull()
@@ -104,7 +101,6 @@ namespace UnitTestAPI
         {
             IHttpActionResult actionResult = controller.GetUser(GetExistingNormalUser().id);       
             Assert.IsInstanceOf<OkNegotiatedContentResult<User>>(actionResult);
-
         }
         [Test]
         public void GetUserByID_UserDoNotExist()
@@ -117,18 +113,16 @@ namespace UnitTestAPI
         [Test]
         public void UpdateUser_PasswordTooShort()
         {
-            User user = GetExistingNormalUserForUpdating();
-            user.password = "123";
+            User tempUser = user;
+            tempUser.password = "123";
 
-            IHttpActionResult actionResult = controller.PutUser(user.id, user);
+            IHttpActionResult actionResult = controller.PutUser(user.id, tempUser);
             Assert.IsInstanceOf<BadRequestErrorMessageResult>(actionResult);
         }
         [Test]
         public void UpdateUser_IdNotMatching()
         {
-            User user = GetExistingNormalUserForUpdating();
-
-            IHttpActionResult actionResult = controller.PutUser(8, user);
+            IHttpActionResult actionResult = controller.PutUser(1, user);
             Assert.IsInstanceOf<BadRequestErrorMessageResult>(actionResult);
         }
         [Test]
@@ -161,48 +155,57 @@ namespace UnitTestAPI
         //AddFavRest
         //RemoveFavRest
 
-        [TestMethod]
+        [Test]
         public void AddFavRest_Success()
         {
             var controller = new UsersController();
-            User user = GetExistingNormalUserForUpdating();
-            user.city = "Göteborg";
+
 
             string message = controller.AddFavRest(user.id, 1);
             Assert.AreEqual("Success", message);
         }
-        [TestMethod]
+
+        //TODO: 
+        [Test]
         public void AddFavRest_Failure()
         {
             var controller = new UsersController();
-            User user = GetExistingNormalUser();
-            
-            string message = controller.AddFavRest(user.id, 320);
+            int restaurantId = Int32.MaxValue;
+
+            string message = controller.AddFavRest(user.id, restaurantId);
             Assert.AreNotEqual("Success", message);
         }
-        [TestMethod]
+        [Test]
         public void RemoveFavRest_Success()
         {
             var controller = new UsersController();
-            User user = GetExistingNormalUser();
 
+            // Add favorite before removing
+            controller.AddFavRest(user.id, 1);
             string message = controller.RemoveFavRest(user.id, 1);
             Assert.AreEqual("Success", message);
         }
-        [TestMethod]
+        [Test]
         public void RemoveFavRest_Failure()
         {
             var controller = new UsersController();
-            User user = GetExistingNormalUser();
 
             string message = controller.RemoveFavRest(user.id, 1);
+            Assert.AreNotEqual("Success", message);
+        }
+        [Test]
+        public void RemoveFavRest_RestaurantDoNotExist()
+        {
+            var controller = new UsersController();
+
+            string message = controller.RemoveFavRest(user.id, Int32.MaxValue);
             Assert.AreNotEqual("Success", message);
         }
 
         #region Mockup Users
         private User GetNonExistingUser() 
         {
-            return new User() { username = "UnitTestUser123456", password = "123456", role = "user", id = 10001};
+            return new User() { username = "UnitTestUser123456", password = "123456", role = "user", id = Int32.MaxValue};
         }
         private User GetNewMockupUser()
         {
@@ -212,15 +215,14 @@ namespace UnitTestAPI
         {
             return new User() { username = "mockeduser", password = "123456", id = 1, role = "user"};
         }
-        private User GetExistingNormalUserForUpdating()
-        {
-            return new User() {id = 9, adress = "nygatan 13", password = "12314345", city = "Trollhättan", username = "Harald" };
-        }
+        //private User GetExistingNormalUserForUpdating()
+        //{
+        //    return new User() {id = 9, adress = "nygatan 13", password = "12314345", city = "Trollhättan", username = "Harald" };
+        //}
         private User GetExistingAdminUser()
         {
             return new User() { username = "potionseller", password = "123456", role = "admin", id = 2 };
         }
         #endregion
-       
     }
 }

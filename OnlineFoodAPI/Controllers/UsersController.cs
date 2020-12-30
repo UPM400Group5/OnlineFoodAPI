@@ -141,17 +141,16 @@ namespace OnlineFoodAPI.Controllers
           
             try
             {
-                User user = db.User.Find(userid);
                 var Restaurant = db.Restaurant.Find(restid);
+
+                
 
                 // If restaurant does not exist
                 if (Restaurant == null)
                 {
                     return "could not find the restaurant";
                 }
-                FavoritesRestaurants favoritesRestaurant = new FavoritesRestaurants();
-                favoritesRestaurant.Restaurant_id = Restaurant.id;
-                favoritesRestaurant.User_id = user.id;
+                FavoritesRestaurants favoritesRestaurant = db.FavoritesRestaurants.Where(x => x.Restaurant_id == restid && x.User_id == userid).FirstOrDefault();
 
                 db.FavoritesRestaurants.Attach(favoritesRestaurant); //telling db what kind of object to delete
                 db.Entry(favoritesRestaurant).State = EntityState.Deleted;  //db deletes it
