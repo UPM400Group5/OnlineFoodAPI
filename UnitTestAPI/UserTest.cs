@@ -39,11 +39,7 @@ namespace UnitTestAPI
             catch (Exception e)
             {
 
-<<<<<<< Updated upstream
             }
-=======
-            }   
->>>>>>> Stashed changes
         }
         [Test]
         public void GetUsersNotAdmin_ReturnsNull()
