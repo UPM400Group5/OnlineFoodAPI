@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using System.Data.Entity;
 using System.Linq;
 using OnlineFoodAPI;
@@ -9,139 +8,153 @@ using System.Web.Http.Description;
 using System.Net.Http;
 using System.Web.Http.Routing;
 using System.Web.Http.Results;
+using NUnit.Framework;
+using System.Collections.Generic;
 
 namespace UnitTestAPI
 {
-    [TestClass]
+    
     public class UserTest
     {
-        [TestMethod]
+        User user;
+        UsersController controller = new UsersController();
+        [SetUp]
+        public void Setup()
+        {
+            user = GetNewMockupUser();
+            var result = controller.PostUser(user);
+            List<User> listuser = controller.GetAllUsers(2).ToList();
+            var tempuser = listuser[(listuser.Count() - 1)];
+            user.id = tempuser.id;
+
+        }
+        [TearDown]
+        public void Teardown()
+        {
+            try
+            {
+                controller.ModelState.Clear();
+                var result =
+                    controller.DeleteUser(user.id);
+            }
+            catch (Exception e)
+            {
+
+            }
+           
+
+        }
+        [Test]
         public void GetUsersNotAdmin_ReturnsNull()
         {
-            var controller = new UsersController();
 
             // Send id
             var result = controller.GetAllUsers(GetExistingNormalUser().id);
 
             Assert.IsNull(result);
         }
-        [TestMethod]
+        [Test]
         public void GetUsersAsAdmin_ReturnsNotNull()
         {
-            var controller = new UsersController();
 
-            // Send id
             var result = controller.GetAllUsers(GetExistingAdminUser().id);
 
             Assert.IsNotNull(result);
         }
-        [TestMethod]
+        [Test]
         public void CreateNewUserSuccessful_ReturnsContent() 
         {
          
-            var controller = new UsersController();
-
             // Act
-            var user = GetNewMockupUser();
             IHttpActionResult actionResult = controller.PostUser(user);
-            var createdResult = actionResult as CreatedAtRouteNegotiatedContentResult<User>;
+            var createdResult = actionResult as OkNegotiatedContentResult<User>;
 
             // Assert
-            Assert.IsNotNull(createdResult);
-            Assert.AreEqual("DefaultApi", createdResult.RouteName);
-            Assert.IsNotInstanceOfType(actionResult, typeof(BadRequestErrorMessageResult)); // Is not error
-            Assert.AreEqual(createdResult.Content.username, user.username); // User is returned
+            Assert.IsInstanceOf<OkNegotiatedContentResult<User>>(actionResult);
+            Assert.AreEqual(user.username, createdResult.Content.username); // User is returned
         }
-        [TestMethod]
-        public void CreateNewUserBadPassword_ReturnsBadRequest() 
+        [Test]
+         public void CreateNewUserBadPassword_ReturnsBadRequest() 
         {
-            var controller = new UsersController();
-
-            var user = GetNewMockupUser();
             user.password = "123"; // Bad password
 
             IHttpActionResult actionResult = controller.PostUser(user);
+            Assert.IsInstanceOf<BadRequestErrorMessageResult>(actionResult);
 
-            Assert.IsInstanceOfType(actionResult, typeof(BadRequestErrorMessageResult));
-        }
-        [TestMethod]
+            Assert.IsInstanceOf<BadRequestErrorMessageResult>(actionResult);
+        } 
+        [Test]
         public void DeleteExistingUser_ReturnsOk()
         {
             //TODO: Assign id of user before starting
-            int id = 5;
-            var controller = new UsersController();
-
-            IHttpActionResult actionResult = controller.DeleteUser(id);
-            Assert.IsInstanceOfType(actionResult, typeof(OkNegotiatedContentResult<User>));
+            IHttpActionResult actionResult = controller.DeleteUser(user.id);
+            Assert.IsInstanceOf<OkNegotiatedContentResult<User>>(actionResult);
         }
-        [TestMethod]
+        [Test]
         public void DeleteNonExistingUser_NotFound()
         {
-            var controller = new UsersController();
-            int id = GetNonExistingUser().id;
+            int id = Int32.MaxValue;
             IHttpActionResult actionResult = controller.DeleteUser(id); // Random number, no id should be this high yet...
 
-            Assert.IsInstanceOfType(actionResult, typeof(NotFoundResult));
+            Assert.IsInstanceOf<NotFoundResult>(actionResult);
         }
 
-        [TestMethod]
+        [Test]
         public void GetUserByID_UserExists()
         {
-            var controller = new UsersController();
             IHttpActionResult actionResult = controller.GetUser(GetExistingNormalUser().id);       
-            Assert.IsInstanceOfType(actionResult, typeof(OkNegotiatedContentResult<User>));
+            Assert.IsInstanceOf<OkNegotiatedContentResult<User>>(actionResult);
+
         }
-        [TestMethod]
+        [Test]
         public void GetUserByID_UserDoNotExist()
         {
-            var controller = new UsersController();
             int id = GetNonExistingUser().id;
 
             IHttpActionResult actionResult = controller.GetUser(id);
-            Assert.IsInstanceOfType(actionResult, typeof(NotFoundResult));
+            Assert.IsInstanceOf<NotFoundResult>(actionResult);
         }
-        [TestMethod]
+        [Test]
         public void UpdateUser_PasswordTooShort()
         {
-            var controller = new UsersController();
             User user = GetExistingNormalUserForUpdating();
             user.password = "123";
 
             IHttpActionResult actionResult = controller.PutUser(user.id, user);
-            Assert.IsInstanceOfType(actionResult, typeof(BadRequestErrorMessageResult));
+            Assert.IsInstanceOf<BadRequestErrorMessageResult>(actionResult);
         }
-        [TestMethod]
+        [Test]
         public void UpdateUser_IdNotMatching()
         {
-            var controller = new UsersController();
             User user = GetExistingNormalUserForUpdating();
 
             IHttpActionResult actionResult = controller.PutUser(8, user);
-            Assert.IsInstanceOfType(actionResult, typeof(BadRequestErrorMessageResult));
+            Assert.IsInstanceOf<BadRequestErrorMessageResult>(actionResult);
         }
-        [TestMethod]
+        [Test]
         public void UpdateUser_UserDoNotExist()
         {
-            var controller = new UsersController();
             User user = GetNonExistingUser();
       
             IHttpActionResult actionResult = controller.PutUser(user.id, user);
-            Assert.IsInstanceOfType(actionResult, typeof(BadRequestErrorMessageResult));
+            Assert.IsInstanceOf<NotFoundResult>(actionResult);
+        }
+        public void UpdateUser_BadRequestModelNotValid()
+        {
+            User user = GetNonExistingUser();
+            controller.ModelState.AddModelError("test", "test");
+            IHttpActionResult actionResult = controller.PutUser(user.id, user);
+            Assert.IsInstanceOf<InvalidModelStateResult>(actionResult);
         }
 
         //TODO: Update fungerar ej
-        [TestMethod]
+        [Test]
         public void UpdateUser_ReturnsAccepted() 
         {
-            var controller = new UsersController();
-            User user = GetExistingNormalUserForUpdating();
-            user.city = "Göteborg";
-          
-
+            user.city = "Göteborg";          
             IHttpActionResult actionResult = controller.PutUser(user.id, user);
-            var contentResult = actionResult as NegotiatedContentResult<User>;
 
-            Assert.AreEqual(System.Net.HttpStatusCode.Accepted, contentResult.StatusCode);
+            Assert.IsInstanceOf<OkNegotiatedContentResult<string>>(actionResult);
         }
 
         //TODO: Restauranger

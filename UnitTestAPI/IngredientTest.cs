@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using System.Data.Entity;
 using System.Linq;
 using OnlineFoodAPI.Controllers;
@@ -7,133 +6,140 @@ using OnlineFoodAPI.Models;
 using OnlineFoodAPI;
 using System.Web.Http;
 using System.Web.Http.Results;
+using Moq;
+using NUnit.Framework;
+using System.Collections.Generic;
 
 namespace UnitTestAPI
 {
-    [TestClass]
+    
     public class IngredientTest
     {
+        IngredientsController controller;
+        Ingredient item;
+        int userid = 2;
 
-        [TestMethod]
-        public void AddIngredient()
+        [SetUp]
+        public void Setup()
         {
+            controller= new IngredientsController();
 
-            var controller = new IngredientsController();
-
-            var item = GetDemoIngredient();
-
+            item = GetDemoIngredient();
             var result =
                 controller.PostIngredient(item);
+            List<Ingredient> listing = controller.GetIngredient().ToList();
+            var ingredient = listing[listing.Count() - 1];
+            item.id = ingredient.id;
+        }
+        [TearDown]
+        public void Teardown()
+        {
+            try
+            {
+                userid = 2;
+                controller.ModelState.Clear();
 
-
-            Assert.AreEqual(result, "succesfully created DemoIngredient");
+                var result =
+                    controller.DeleteIngredient(item.id, userid);
+            }
+            catch { }
 
         }
 
-        [TestMethod]
+        [Test]
+        public void PutIngredient_StatusCodeSuccesfullPut() //has to .name each time.
+        {
+            item.name = "NewNameInPut"; //Update each time
+            IHttpActionResult actionresult = controller.PutIngredient(item, userid);
+            Assert.IsInstanceOf<StatusCodeResult>(actionresult);
+
+        }
+
+
+        [Test]
         public void GetIngredients_ReturnsListOfIngredients()
         {
-            var controller = new IngredientsController();
             var item = controller.GetIngredient();
             Assert.IsNotNull(item);
         }
         
-        [TestMethod]
+        [Test]
         public void GetSpecificIngredient_returnsOneIngredient()
         {
-            var controller = new IngredientsController();
             var id = 1;
             IHttpActionResult actionResult = controller.GetIngredient(id);
             var contentresult = actionResult as OkNegotiatedContentResult<Ingredient>;
             //if id are the same
             Assert.AreEqual(id, contentresult.Content.id);
         }
-        [TestMethod]
+        [Test]
         public void GetSpecificIngredient_Fails()
         {
-            var controller = new IngredientsController();
             var id = 4;
             IHttpActionResult actionresult = controller.GetIngredient(id);
 
-            Assert.IsInstanceOfType(actionresult, typeof(NotFoundResult));
+            Assert.IsInstanceOf<NotFoundResult>(actionresult);
 
         }
-        [TestMethod]
+        [Test]
         public void PutIngredient_BadRequestFoodExist()
         {
-            var controller = new IngredientsController();
-            var userid = 2;
             Ingredient demoing = GetDemoPutExistingIngredient();
             IHttpActionResult actionresult = controller.PutIngredient(demoing, userid);
-            Assert.IsInstanceOfType(actionresult, typeof(BadRequestErrorMessageResult));
+            Assert.IsInstanceOf<BadRequestErrorMessageResult>(actionresult);
         }
-        /*[TestMethod]
-        public void PutIngredient_BadRequest()
-        {
-            var controller = new IngredientsController();
-            var userid = 2;
-            Ingredient demoing = GetDemoBadPutIngredient();
-            IHttpActionResult actionresult = controller.PutIngredient(demoing, userid);
-            Assert.IsInstanceOfType(actionresult, typeof(BadRequestErrorMessageResult));
-        } */
-        [TestMethod]
+
+        [Test]
         public void PutIngredient_BadRequestUserIsNotAdmin()
         {
-            var controller = new IngredientsController();
-            var userid = 1;
+           userid = 1;
             Ingredient demoing = GetDemoBadPutIngredient();
             IHttpActionResult actionresult = controller.PutIngredient(demoing, userid);
-            Assert.IsInstanceOfType(actionresult, typeof(BadRequestErrorMessageResult));
-        }
-        [TestMethod]
-        public void PutIngredient_StatusCodeSuccesfullPut() //has to .name each time.
+            Assert.IsInstanceOf<BadRequestErrorMessageResult>(actionresult);
+        } 
+
+        [Test]
+        public void PutIngredient_BadRequestModelNotValid()
         {
-            var controller = new IngredientsController();
-            var userid = 2;
-            Ingredient demoing = GetDemoPutIngredient();
-            demoing.name = "12347"; //Update each time
+            Ingredient demoing = GetDemoBadPutIngredient();
+            controller.ModelState.AddModelError("test", "test");
             IHttpActionResult actionresult = controller.PutIngredient(demoing, userid);
-            updateBackDb();
-            Assert.IsInstanceOfType(actionresult, typeof(StatusCodeResult));
-            
+            Assert.IsInstanceOf<InvalidModelStateResult>(actionresult);
         }
-        [TestMethod]
-        public void DelteIngredient_statusOKSucess() //has to change id each time
+
+        [Test]
+        public void DeleteIngredient_statusOKSucess() //has to change id each time
         {
-            var controller = new IngredientsController();
-            var userid = 2;
-            var id = 58; //has to be changed each time?
-            IHttpActionResult actionresult = controller.DeleteIngredient(id, userid);
-            Assert.IsInstanceOfType(actionresult, typeof(OkNegotiatedContentResult<Ingredient>));
+            IHttpActionResult actionresult = controller.DeleteIngredient(item.id, userid);
+            Assert.IsInstanceOf<OkNegotiatedContentResult<Ingredient>>(actionresult);
+            List<Ingredient> listing = controller.GetIngredient().ToList();
+            bool existiteminlist = listing.Exists(x => x.id == item.id);
+            Assert.IsFalse(existiteminlist);
+
         }
-        [TestMethod]
+         [Test]
         public void DeleteIngredient_BadRequestUserNotAdmin()
         {
-            var controller = new IngredientsController();
-            var userid = 1;
+            userid = 1;
             var id = 50;
             IHttpActionResult actionresult = controller.DeleteIngredient(id, userid);
-            Assert.IsInstanceOfType(actionresult, typeof(BadRequestErrorMessageResult));
+            Assert.IsInstanceOf<BadRequestErrorMessageResult>(actionresult);
         }
-        [TestMethod]
+        [Test]
         public void DeleteIngredient_BadRequestDishDoestNotExist()
         {
-            var controller = new IngredientsController();
-            var userid = 2;
-            var id = 4;
+            var id = Int32.MaxValue;
             IHttpActionResult actionresult = controller.DeleteIngredient(id, userid);
-            Assert.IsInstanceOfType(actionresult, typeof(NotFoundResult));
-        }
+            Assert.IsInstanceOf<NotFoundResult>(actionresult);
 
-
-
+        } 
         Ingredient GetDemoIngredient()
         {
             return new Ingredient() { id = 52, name = "DemoIngredient" };
         }
         Ingredient GetDemoPutIngredient()
         {
-            return new Ingredient() { id = 2, name = "DemoCheese3"  };
+            return new Ingredient() { id = 2, name = "DemoCheese3"};
         }
         Ingredient GetDemoBadPutIngredient()
         {
@@ -144,19 +150,11 @@ namespace UnitTestAPI
         {
             return new Ingredient() { id = 3, name = "Pesto" };
         }
-        void updateBackDb()
-        {
-            var controller = new IngredientsController();
-            Ingredient demoing = GetDemoBadPutIngredient();
-            demoing.name = "democheese";
-            var userid = 2;
-            IHttpActionResult actionresult = controller.PutIngredient(demoing, userid);
 
-        }
 
     }
     #region old
-    //[TestMethod]
+    //[Test]
     //public void UpdateIngredient_WithNameOfObject()
     //{
 
@@ -176,7 +174,7 @@ namespace UnitTestAPI
 
     //}
 
-    //[TestMethod]
+    //[Test]
     //public void DeleteIngredient_ReturnOK()
     //{
     //    var mock

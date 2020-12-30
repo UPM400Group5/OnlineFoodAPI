@@ -86,7 +86,7 @@ namespace OnlineFoodAPI.Controllers
                     throw;
                 }
             }
-            return StatusCode(HttpStatusCode.NoContent);
+            return Ok("user updated");
         }
 
 
@@ -108,7 +108,7 @@ namespace OnlineFoodAPI.Controllers
             db.User.Add(user); //add user to db
             db.SaveChanges();
 
-            return CreatedAtRoute("DefaultApi", new { id = user.id }, user);
+            return Ok(user);
         }
 
         #region FAVOURITE RESTAURANTS
@@ -189,14 +189,6 @@ namespace OnlineFoodAPI.Controllers
             return Ok(user);
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
 
         private bool UserExists(int id)
         {
