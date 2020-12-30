@@ -36,14 +36,7 @@ namespace UnitTestAPI
                 var result =
                     controller.DeleteUser(user.id);
             }
-            catch (Exception e)
-            {
-
-<<<<<<< Updated upstream
-            }
-=======
-            }   
->>>>>>> Stashed changes
+            catch (Exception e) {}
         }
         [Test]
         public void GetUsersNotAdmin_ReturnsNull()

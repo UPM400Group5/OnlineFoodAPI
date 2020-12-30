@@ -66,21 +66,28 @@ namespace OnlineFoodAPI.Controllers
                     return "Remove specialprice before changing normal price";
                 }
             }
-            try
+           /* try
             {
-                DishesIngredient tempdishing = db.DishesIngredient.Where(e => e.Dishes_id == dishes.id).FirstOrDefault(); //create temporary dishingreidnt with the dishes model from user
-                db.DishesIngredient.Attach(tempdishing);
-                db.Entry(tempdishing).State = EntityState.Deleted; //we delete the object i dbo.dishesingredient that has the id and save. 
-                db.SaveChanges();
+                List<DishesIngredient> tempdishing = db.DishesIngredient.Where(e => e.Dishes_id == dishes.id).ToList(); //add all dishesingredient from dbo.dishesingredient that has dish_id as dishid sent in header
+                if (tempdishing.Count != 0)
+                {
+                    foreach (DishesIngredient item in tempdishing) //each dishingredient in tempdishing list
+                    {
+                        db.DishesIngredient.Remove(item); //removes all rows where item(dishingredient with dish_id == dishid) exists.
+
+                    }
+                }
+
+                //we delete the object i dbo.dishesingredient that has the id and save. '
                 //We delete to create.
             }
-            catch
+            catch (Exception e)
             {
                 return "There was no ingredient attached";
-            }
+            } */
             try
             {
-                foreach (var item in dishes.Ingredient) //now we adding what we deleted, just renewed to the current models ingredients.
+                foreach (var item in dishes.Ingredient) //now we add what we deleted, just renewed to the current models ingredients.
                 {
                     Ingredient temping = new Ingredient();
                     Ingredient testing = db.Ingredient.Where(e => e.name == item.name).FirstOrDefault(); //search ingredients of the dishes ingredient name, only thing user sends.
@@ -100,16 +107,17 @@ namespace OnlineFoodAPI.Controllers
                     tempdishtoaddtotable.Dishes_id = dishes.id;
                     tempdishtoaddtotable.Ingredient_id = ing_id.id;
                     db.DishesIngredient.Add(tempdishtoaddtotable); // Add to dbo.dishesingredient with the new dish_id and Ingredient_id
+                    db.SaveChanges();
                 }
             }
             catch(Exception e) { }
-            /*try  //Now we have to update the object.
+            try  //Now we have to update the object.
             {
                 var activityinDb = db.Dishes.Find(dishes.id);
                 if (activityinDb == null)
                 {
                     db.Dishes.Add(dishes);
-                    db.SaveChanges();
+                   db.SaveChanges();
                 }
                 activityinDb.name = dishes.name;
                 activityinDb.price = dishes.price;
@@ -119,13 +127,14 @@ namespace OnlineFoodAPI.Controllers
                 activityinDb.specialprice = dishes.specialprice;
                 db.Entry(activityinDb).State = EntityState.Modified;  //Db knows what to update.
 
-            } 
+            }
             catch (DbUpdateConcurrencyException)
             {
                 if (!DishesExists(id)) { return "dish doesnt exist"; } //if the dish doesnt exist
                 else { throw; }
-            } */
+            }
             db.SaveChanges();
+
             return "updated";
         }
         [Route("dishes/getspecificdish/{id}")]
