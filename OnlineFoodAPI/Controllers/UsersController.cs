@@ -116,13 +116,14 @@ namespace OnlineFoodAPI.Controllers
         [Route("Users/addfavrest/{userid}/{restid}")]
         public string AddFavRest(int userid, int restid) //Ad, with GET, Favourite restaurant to db. Since user sho uld only press an icon to add.
         {
-            User user = db.User.Find(userid); //find user with logged in userid sent through header of api
-            var Restaurant = db.Restaurant.Find(restid); //find restaurant with restaurantID sent through header of api
-            FavoritesRestaurants favoritesRestaurant = new FavoritesRestaurants(); //specify the new favouriterestaurant with an object to send to dbo.FavouriteRestaurant
-            favoritesRestaurant.Restaurant_id = Restaurant.id;
-            favoritesRestaurant.User_id = user.id;
             try
             {
+                User user = db.User.Find(userid); //find user with logged in userid sent through header of api
+                var Restaurant = db.Restaurant.Find(restid); //find restaurant with restaurantID sent through header of api
+                FavoritesRestaurants favoritesRestaurant = new FavoritesRestaurants(); //specify the new favouriterestaurant with an object to send to dbo.FavouriteRestaurant
+                favoritesRestaurant.Restaurant_id = Restaurant.id;
+                favoritesRestaurant.User_id = user.id;
+
                 db.FavoritesRestaurants.Add(favoritesRestaurant); //add to db
                 db.SaveChanges();
                 return "Success";
@@ -134,20 +135,24 @@ namespace OnlineFoodAPI.Controllers
         }
 
         [HttpDelete]
-        [Route("Users/Removefavrest/{userid}/{restid}")]   //Removes favrestauarant - Tested and works
+        [Route("Users/Removefavrest/{userid}/{restid}")]  
         public string RemoveFavRest(int userid, int restid) //only from header of api since the user should only press a button to 'unsubscribe'
         {
-            User user = db.User.Find(userid); //find user in dbo.User with userid from header of api
-            var Restaurant = db.Restaurant.Find(restid); //find restaurant from dbo.restaurants with restid from header of api
-            if (Restaurant == null) //if restaurant cant be found
-            {
-                return "could not find the restaurant";
-            }
-            FavoritesRestaurants favoritesRestaurant = new FavoritesRestaurants();  //make an object out of the data we found
-            favoritesRestaurant.Restaurant_id = Restaurant.id; 
-            favoritesRestaurant.User_id = user.id;
+          
             try
             {
+                User user = db.User.Find(userid);
+                var Restaurant = db.Restaurant.Find(restid);
+
+                // If restaurant does not exist
+                if (Restaurant == null)
+                {
+                    return "could not find the restaurant";
+                }
+                FavoritesRestaurants favoritesRestaurant = new FavoritesRestaurants();
+                favoritesRestaurant.Restaurant_id = Restaurant.id;
+                favoritesRestaurant.User_id = user.id;
+
                 db.FavoritesRestaurants.Attach(favoritesRestaurant); //telling db what kind of object to delete
                 db.Entry(favoritesRestaurant).State = EntityState.Deleted;  //db deletes it
                 db.SaveChanges(); //save db
@@ -171,6 +176,7 @@ namespace OnlineFoodAPI.Controllers
             {
                 return NotFound();
             }
+            // User that is being deleted could be connected to FavoriteRestaurants table
             List<FavoritesRestaurants> templist = db.FavoritesRestaurants.Where(e => e.User_id == user.id).ToList(); //have to remove foreign key restraints in dbo.FavouriteRestaurant
             foreach(var item in templist)
             {

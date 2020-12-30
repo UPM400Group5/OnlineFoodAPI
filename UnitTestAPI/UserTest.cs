@@ -144,6 +144,47 @@ namespace UnitTestAPI
             Assert.AreEqual(System.Net.HttpStatusCode.Accepted, contentResult.StatusCode);
         }
 
+        //TODO: Restauranger
+        //AddFavRest
+        //RemoveFavRest
+
+        [TestMethod]
+        public void AddFavRest_Success()
+        {
+            var controller = new UsersController();
+            User user = GetExistingNormalUserForUpdating();
+            user.city = "Göteborg";
+
+            string message = controller.AddFavRest(user.id, 1);
+            Assert.AreEqual("Success", message);
+        }
+        [TestMethod]
+        public void AddFavRest_Failure()
+        {
+            var controller = new UsersController();
+            User user = GetExistingNormalUser();
+            
+            string message = controller.AddFavRest(user.id, 320);
+            Assert.AreNotEqual("Success", message);
+        }
+        [TestMethod]
+        public void RemoveFavRest_Success()
+        {
+            var controller = new UsersController();
+            User user = GetExistingNormalUser();
+
+            string message = controller.RemoveFavRest(user.id, 1);
+            Assert.AreEqual("Success", message);
+        }
+        [TestMethod]
+        public void RemoveFavRest_Failure()
+        {
+            var controller = new UsersController();
+            User user = GetExistingNormalUser();
+
+            string message = controller.RemoveFavRest(user.id, 1);
+            Assert.AreNotEqual("Success", message);
+        }
 
         #region Mockup Users
         private User GetNonExistingUser() 
