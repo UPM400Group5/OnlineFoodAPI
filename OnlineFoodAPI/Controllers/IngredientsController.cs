@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
 using OnlineFoodAPI;
+using OnlineFoodAPI.Models;
 
 namespace OnlineFoodAPI.Controllers
 {
@@ -93,6 +94,11 @@ namespace OnlineFoodAPI.Controllers
             if (ingredient == null)
             {
                 return NotFound();
+            }
+            List<DishesIngredient> dishesingred = db.DishesIngredient.Where(e => e.Ingredient_id == id).ToList();
+            foreach (var item in dishesingred) 
+            {
+                db.DishesIngredient.Remove(item);
             }
 
             db.Ingredient.Remove(ingredient); //remove ingredient from db

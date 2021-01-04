@@ -76,7 +76,7 @@ namespace UnitTestAPI
         [Test]
         public void GetRestaurauntById_Successfully()
         {
-            IHttpActionResult actionResult = controller.GetRestaurant(restaurant.id);
+            IHttpActionResult actionResult = controller.GetRestaurant(1);
             Assert.IsInstanceOf<OkNegotiatedContentResult<Restaurant>>(actionResult);
         }
 
@@ -98,6 +98,8 @@ namespace UnitTestAPI
         public void GetFavouriteRestaurant_Successfully()
         {
             // Get list
+            UsersController controllerUser = new UsersController();
+            var newfavrestaurant = controllerUser.AddFavRest(1, 2);
             var list = controller.GetFavouriteRestaurant(1);
             Assert.IsNotNull(list);
         }
@@ -133,10 +135,8 @@ namespace UnitTestAPI
             restaurant.city = "Malmö";
             IHttpActionResult actionResult = controller.PutRestaurant(restaurant);
 
-            var message = actionResult as StatusCodeResult;
-
             // If ok, it succeded
-            Assert.AreEqual("ok",message.StatusCode.ToString().ToLower());
+            Assert.IsInstanceOf<OkNegotiatedContentResult<Restaurant>>(actionResult);
         }
         [Test]
         public void UpdateRestaurant_NotFound()
@@ -161,6 +161,8 @@ namespace UnitTestAPI
         [Test]
         public void DeleteRestaurant_Successfully()
         {
+            UsersController Usercontroller = new UsersController();
+            Usercontroller.AddFavRest(2, restaurant.id);
             IHttpActionResult actionResult = controller.DeleteRestaurant(restaurant.id);
             Assert.IsInstanceOf<OkNegotiatedContentResult<Restaurant>>(actionResult);
         }

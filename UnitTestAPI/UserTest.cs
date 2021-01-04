@@ -130,6 +130,7 @@ namespace UnitTestAPI
             IHttpActionResult actionResult = controller.PutUser(user.id, user);
             Assert.IsInstanceOf<NotFoundResult>(actionResult);
         }
+        [Test]
         public void UpdateUser_BadRequestModelNotValid()
         {
             User user = GetNonExistingUser();
@@ -146,10 +147,22 @@ namespace UnitTestAPI
 
             Assert.IsInstanceOf<OkNegotiatedContentResult<string>>(actionResult);
         }
+        [Test]
+        public void PutUser_BadModel()
+        {
+            controller.ModelState.AddModelError("test", "test");
+            var badmodel = controller.PutUser(2, user);
+            Assert.IsInstanceOf<InvalidModelStateResult>(badmodel);
+        }
 
-        //TODO: Restauranger
-        //AddFavRest
-        //RemoveFavRest
+        [Test]
+        public void PostUser_BadModel()
+        {
+            controller.ModelState.AddModelError("test", "test");
+            var badmodel = controller.PostUser(user);
+            Assert.IsInstanceOf<InvalidModelStateResult>(badmodel);
+        }
+
 
         [Test]
         public void AddFavRest_Success()

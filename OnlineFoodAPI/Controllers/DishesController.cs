@@ -63,7 +63,7 @@ namespace OnlineFoodAPI.Controllers
                 Dishes dish = db.Dishes.Find(dishes.id);
                 if (dishes.price != dish.price)
                 {
-                    return "Remove specialprice before changing normal price";
+                    return "Remove specialprice before changing normal price"; //hard to test
                 }
             }
            /* try
@@ -111,8 +111,8 @@ namespace OnlineFoodAPI.Controllers
                 }
             }
             catch(Exception e) { }
-            try  //Now we have to update the object.
-            {
+             //Now we have to update the object.
+            
                 var activityinDb = db.Dishes.Find(dishes.id);
                 if (activityinDb == null)
                 {
@@ -127,12 +127,7 @@ namespace OnlineFoodAPI.Controllers
                 activityinDb.specialprice = dishes.specialprice;
                 db.Entry(activityinDb).State = EntityState.Modified;  //Db knows what to update.
 
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DishesExists(id)) { return "dish doesnt exist"; } //if the dish doesnt exist
-                else { throw; }
-            }
+            
             db.SaveChanges();
 
             return "updated";
@@ -147,8 +142,7 @@ namespace OnlineFoodAPI.Controllers
             {
                 return NotFound(); //return notfound if the dish_Id is wrong
             }
-            try
-            {
+            
                 List<Ingredient> temping = new List<Ingredient>();
                 List<DishesIngredient> ingredientlist = db.DishesIngredient.Where(e => e.Dishes_id == dishes.id).ToList(); //adds ingredient that are associated by dbo.DishesIngredient
                 foreach (var item in ingredientlist)
@@ -160,8 +154,7 @@ namespace OnlineFoodAPI.Controllers
                 }
                 dishes.Ingredient = temping;
                 dishes.DishesIngredient = null;  //make them null to not send it recursive data
-            }
-            catch (Exception e) { }
+            
             return Ok(dishes);
         }
 
@@ -172,11 +165,11 @@ namespace OnlineFoodAPI.Controllers
             int totalprice = 0;
             foreach (var item in Ordereddishes)
             {
-                if (item.price != 0 && item.specialprice == null)
+                if (item.price == 0 && item.specialprice == null)
                 {
                     return "something isn't quite right, ERROR: price isnt set";
                 }
-                if (item.specialprice == null)
+                if (item.specialprice == null || item.specialprice == 0)
                 {
                     totalprice += item.price;
                 }
@@ -254,15 +247,11 @@ namespace OnlineFoodAPI.Controllers
                 }
                 if (addtodb) //continue if there is no overlapping of ingredients. 
                 {
-                    try
-                    {
+                    
                         db.DishesIngredient.Add(tempdishing); //save the dishingredient to dbo.dishingredient
                         db.SaveChanges();
-                    }
-                    catch (Exception e)
-                    {
-                        return BadRequest("Could not save to table dishesingredient | " + e); //if dbo cant be updated, return error message
-                    }
+                    
+
                 }
             }
             return Ok("Succesfully added new dish");
@@ -294,15 +283,15 @@ namespace OnlineFoodAPI.Controllers
                 }
             }
 
-            db.Dishes.Remove(dishes); //then we can remove the dish from dbo.dishes since there is not conflict of foreign key
-            db.SaveChanges();
+            try
+            {
+                db.Dishes.Remove(dishes); //then we can remove the dish from dbo.dishes since there is not conflict of foreign key
+                db.SaveChanges();
+            }
+            catch(Exception e) {}
 
             return Ok(dishes); //return the deleted dish
         }
 
-        private bool DishesExists(int id)
-        {
-            return db.Dishes.Count(e => e.id == id) > 0;
-        }
     }
 }

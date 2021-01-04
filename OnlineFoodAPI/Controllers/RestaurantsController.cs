@@ -93,7 +93,7 @@ namespace OnlineFoodAPI.Controllers
                 }
             }
 
-            return StatusCode(HttpStatusCode.OK);
+            return Ok(restaurant);
         }
 
         [HttpPost] 
