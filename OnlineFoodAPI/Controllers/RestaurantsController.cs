@@ -16,7 +16,7 @@ namespace OnlineFoodAPI.Controllers
     public class RestaurantsController : ApiController
     {
         private DatabaseFoodOnlineEntityModel db = new DatabaseFoodOnlineEntityModel();
-
+       
         [HttpGet]
         [Route("restaurant/all")]
         public List<Restaurant> GetRestaurant()
@@ -67,33 +67,45 @@ namespace OnlineFoodAPI.Controllers
         [HttpPut]
         [Route("restaurant/update")]
         [ResponseType(typeof(void))]
-        public IHttpActionResult PutRestaurant(Restaurant restaurant) //sends in object in body
+        public IHttpActionResult PutRestaurant(Restaurant restaurantIn) //sends in object in body
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            db.Entry(restaurant).State = EntityState.Modified;
-
             try
             {
+                // Will be null if not found
+                Restaurant UpdatedRestaurant = db.Restaurant.Find(restaurantIn.id);
+
+                if (UpdatedRestaurant == null) 
+                {
+                    // If null, restaurant does not exist
+                    return NotFound();
+                }
+
+                // This method updates the same way the old did
+                UpdatedRestaurant.name = restaurantIn.name;
+                UpdatedRestaurant.city = restaurantIn.city;
+                UpdatedRestaurant.phonenumber = restaurantIn.phonenumber;
+                UpdatedRestaurant.User = restaurantIn.User;
+                UpdatedRestaurant.Dishes = restaurantIn.Dishes;
+                UpdatedRestaurant.delivery_price = restaurantIn.delivery_price;
+                UpdatedRestaurant.email = restaurantIn.email;
+
+             
+                 // The code below caused errors when updating. Not sure why...  
+                 // db.Entry(restaurant).State = EntityState.Modified;
+
                 db.SaveChanges();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!RestaurantExists(restaurant.id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    //TODO: Osäker på hur jag ska komma in här via unit test...
-                    throw;
-                }
+                // Not sure how to get a catch here...
+                return NotFound();
             }
-
-            return Ok(restaurant);
+            return Ok(restaurantIn);
         }
 
         [HttpPost] 
@@ -152,8 +164,8 @@ namespace OnlineFoodAPI.Controllers
                 db.FavoritesRestaurants.Remove(item);
             }
 
-            db.Restaurant.Remove(restaurant);
-            db.SaveChanges();
+                db.Restaurant.Remove(restaurant);
+                db.SaveChanges();
 
             return Ok(restaurant);
         }

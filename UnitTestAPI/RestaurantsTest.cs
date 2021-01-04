@@ -132,7 +132,24 @@ namespace UnitTestAPI
         public void UpdateRestaurant_Successfully()
         {
 
-            restaurant.city = "Malmö";
+      
+            //  This is hardcoded. The other method broke when it came to this point
+         
+            
+            IHttpActionResult content = controller.GetRestaurant(929);
+            var contentResult = content as OkNegotiatedContentResult<Restaurant>;
+
+            Restaurant restaurant = contentResult.Content;
+
+            if (restaurant.city.ToLower() == "malmö") 
+            {
+                restaurant.city = "Trollhättan";
+            }
+            else 
+            {
+                restaurant.city = "Malmö";
+            }
+
             IHttpActionResult actionResult = controller.PutRestaurant(restaurant);
 
             // If ok, it succeded
@@ -181,7 +198,7 @@ namespace UnitTestAPI
         }
         private Restaurant GetNoneExistingRestaurant()
         {
-            return new Restaurant() { name = "Nilssons Pizzeria", city = "Trollhättan", adress = "Hamngatan 23", delivery_price = 10, email = "Nilssons@yahoo.se", phonenumber = "13123441", id = Int32.MaxValue };
+            return new Restaurant() { name = "Alberts Bageri", city = "Malmö", adress = "Drottninggatan 23", delivery_price = 10, email = "Nilssons@yahoo.se", phonenumber = "13123441", id = Int32.MaxValue };
         }
         private User GetNewMockupUser()
         {
