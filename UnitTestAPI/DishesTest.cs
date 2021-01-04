@@ -13,7 +13,7 @@ namespace UnitTestAPI
         DishesController controller;
         Dishes item;
         int userid;
-        int testpepperoniID;
+        
         [SetUp]
         public void Setup()
         {
@@ -52,8 +52,32 @@ namespace UnitTestAPI
             List<Dishes> tempdish = controller.GetDishes();
             Assert.IsInstanceOf<List<Dishes>>(tempdish);
         }
+
         [Test]
-        public void PutDishes_StringwithSuccess()
+        public void PutDishes_StringNoIngredient()
+        {
+            IngredientsController ingcontroller = new IngredientsController();
+            foreach (var ing in item.Ingredient)
+            {
+                ingcontroller.DeleteIngredient(ing.id, 2);
+            }
+            item.Ingredient = null;
+            var specialpricenull = controller.PutDishess(item.id, 2, item);
+            Assert.AreEqual("There was no ingredient attached", specialpricenull);
+
+        }
+        [Test]
+        public void PutDishes_StringDishUpdated()
+        {
+
+            Dishes PutDish = GetPutDemoDish();
+            PutDish.id = item.id;
+            var ifchangeddish = controller.PutDishess(PutDish.id, 2, PutDish);
+            Assert.AreEqual("updated", ifchangeddish);
+        }
+
+        [Test]
+        public void PutDishes_StringUserWrongDishIDWrong()
         {
             IngredientsController controlleringredient = new IngredientsController();
             List<Ingredient> ingredientlist = controlleringredient.GetIngredient().ToList();
@@ -64,19 +88,8 @@ namespace UnitTestAPI
 
             var checkifdishidistrue = controller.PutDishess(2, 2, item);
             Assert.AreEqual("id doesnt exist", checkifdishidistrue);
-
-
-            var completeDish = controller.PutDishess(item.id, 2, item);
-            Assert.IsInstanceOf<string>(completeDish);
-
-            item.Ingredient = null;
-            var specialpricenull = controller.PutDishess(item.id, 2, item);
-            Assert.AreEqual("There was no ingredient attached", specialpricenull);
-            Dishes PutDish = GetPutDemoDish();
-            PutDish.id = item.id;
-            var ifchangeddish = controller.PutDishess(PutDish.id, 2, PutDish);
-            Assert.AreEqual("updated", ifchangeddish);
         }
+
 
         [Test]
         public void GetDishes_ReturnOkHttp()

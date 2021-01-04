@@ -75,18 +75,17 @@ namespace UnitTestAPI
         [Test]
         public void GetSpecificIngredient_returnsOneIngredient()
         {
-            var id = 1;
-            IHttpActionResult actionResult = controller.GetIngredient(id);
+
+            IHttpActionResult actionResult = controller.GetIngredient(item.id);
             var contentresult = actionResult as OkNegotiatedContentResult<Ingredient>;
             //if id are the same
-            Assert.AreEqual(id, contentresult.Content.id);
+            Assert.AreEqual(item.id, contentresult.Content.id);
         }
         [Test]
         public void GetSpecificIngredient_Fails()
         {
-            var id = 4;
+            var id = Int32.MaxValue;
             IHttpActionResult actionresult = controller.GetIngredient(id);
-
             Assert.IsInstanceOf<NotFoundResult>(actionresult);
 
         }
@@ -117,7 +116,7 @@ namespace UnitTestAPI
         }
 
         [Test]
-        public void DeleteIngredient_statusOKSucess() //has to change id each time
+        public void DeleteIngredient_statusOKSucess() 
         {
             IHttpActionResult actionresult = controller.DeleteIngredient(item.id, userid);
             Assert.IsInstanceOf<OkNegotiatedContentResult<Ingredient>>(actionresult);
