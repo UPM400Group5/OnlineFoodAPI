@@ -42,6 +42,8 @@ namespace UnitTestAPI
                     controllerIng.GetIngredient().ToList();
                 Ingredient temping = result2.Find(e=>e.name == "testpepperoni");
                 controllerIng.DeleteIngredient(temping.id, userid);
+                temping = result2.Find(e => e.name == "ost");
+                controllerIng.DeleteIngredient(temping.id, userid);
             }
             catch { }
         }
@@ -57,7 +59,11 @@ namespace UnitTestAPI
         public void PutDishes_StringNoIngredient()
         {
             IngredientsController ingcontroller = new IngredientsController();
-            foreach (var ing in item.Ingredient)
+            List<Ingredient> ingredientswithID = ingcontroller.GetIngredient().ToList();
+            List<Ingredient> ingredienstodelete = new List<Ingredient>();
+            Ingredient temping = item.Ingredient.First();
+            ingredienstodelete = ingredientswithID.Where(e => e.name == temping.name).ToList();
+            foreach (var ing in ingredienstodelete)
             {
                 ingcontroller.DeleteIngredient(ing.id, 2);
             }
@@ -79,13 +85,8 @@ namespace UnitTestAPI
         [Test]
         public void PutDishes_StringUserWrongDishIDWrong()
         {
-            IngredientsController controlleringredient = new IngredientsController();
-            List<Ingredient> ingredientlist = controlleringredient.GetIngredient().ToList();
-            Ingredient ingredient = ingredientlist.Find(x => x.name == "testpepperoni");
-            controlleringredient.DeleteIngredient(ingredient.id, 2); //added to remove id to get into row 96 -> 101
             var checkifadmin = controller.PutDishess(item.id, 1, item);
             Assert.IsInstanceOf<string>(checkifadmin);
-
             var checkifdishidistrue = controller.PutDishess(2, 2, item);
             Assert.AreEqual("id doesnt exist", checkifdishidistrue);
         }

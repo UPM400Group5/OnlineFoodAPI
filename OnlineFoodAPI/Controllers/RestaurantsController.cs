@@ -16,12 +16,12 @@ namespace OnlineFoodAPI.Controllers
     public class RestaurantsController : ApiController
     {
         private DatabaseFoodOnlineEntityModel db = new DatabaseFoodOnlineEntityModel();
-       
+
         [HttpGet]
         [Route("restaurant/all")]
         public List<Restaurant> GetRestaurant()
         {
-            return db.Restaurant.ToList(); 
+            return db.Restaurant.ToList();
         }
 
         [Route("restaurant/specific/{id}")]
@@ -47,18 +47,18 @@ namespace OnlineFoodAPI.Controllers
             List<FavoritesRestaurants> FavoriteRestaurants = db.FavoritesRestaurants.Where(uid => uid.User_id == userid).ToList(); //see all favourite restraurants the user has.
             if (FavoriteRestaurants.Count != 0) //see so the list has objects in it
             {
-                foreach (var item in FavoriteRestaurants) 
+                foreach (var item in FavoriteRestaurants)
                 {
                     Restaurant restaurant = new Restaurant();
                     temprestaurants.Add(db.Restaurant.Where(fr => fr.id == item.Restaurant_id).FirstOrDefault()); //add restaurant id 
                 }
             }
-            foreach(var item in temprestaurants)
+            foreach (var item in temprestaurants)
             {
                 item.User = null; //so that the data isnt recursive
                 item.FavoritesRestaurants = null; //so that the data isnt recursive
                 List<Dishes> tempdish = db.Dishes.Where(e => e.Restaurant_id == item.id).ToList(); // Adds the restaurant.dishes so frontend can use it directly
-                item.Dishes = tempdish; 
+                item.Dishes = tempdish;
                 restaurants.Add(item); //adds the object to the list ready for return
             }
             return restaurants;
@@ -75,14 +75,14 @@ namespace OnlineFoodAPI.Controllers
             }
 
 
-             // Will be null if not found
-             Restaurant UpdatedRestaurant = db.Restaurant.Find(restaurantIn.id);
+            // Will be null if not found
+            Restaurant UpdatedRestaurant = db.Restaurant.Find(restaurantIn.id);
 
-             if (UpdatedRestaurant == null) 
-             {
-                 // If null, restaurant does not exist
-                 return NotFound();
-             }
+            if (UpdatedRestaurant == null)
+            {
+                // If null, restaurant does not exist
+                return NotFound();
+            }
 
             // This method updates the same way the old did
             UpdatedRestaurant.name = restaurantIn.name;
@@ -94,11 +94,11 @@ namespace OnlineFoodAPI.Controllers
             UpdatedRestaurant.email = restaurantIn.email;
 
             db.SaveChanges();
-   
+
             return Ok(restaurantIn);
         }
 
-        [HttpPost] 
+        [HttpPost]
         [Route("restaurant/new")]
         [ResponseType(typeof(Restaurant))]
         public IHttpActionResult PostRestaurant(Restaurant restaurant) //works but should send an affirmative if the action goes through instead of error on postman?
@@ -135,10 +135,10 @@ namespace OnlineFoodAPI.Controllers
         [Route("restaurant/dishes/{id}")]
         public List<Dishes> GetRestaurantDishes(int id)
         {
-            return db.Dishes.Where(x => x.Restaurant_id == id).ToList(); 
+            return db.Dishes.Where(x => x.Restaurant_id == id).ToList();
         }
 
-        [HttpDelete] 
+        [HttpDelete]
         [Route("restaurant/{id}")]
         [ResponseType(typeof(Restaurant))]
         public IHttpActionResult DeleteRestaurant(int id)
@@ -149,21 +149,15 @@ namespace OnlineFoodAPI.Controllers
                 return NotFound();
             }
             List<FavoritesRestaurants> restlist = db.FavoritesRestaurants.Where(e => e.Restaurant_id == id).ToList(); //removes each restaurant from db so no foreign keys are left.
-            foreach(var item in restlist)
+            foreach (var item in restlist)
             {
                 db.FavoritesRestaurants.Remove(item);
             }
 
-                db.Restaurant.Remove(restaurant);
-                db.SaveChanges();
+            db.Restaurant.Remove(restaurant);
+            db.SaveChanges();
 
             return Ok(restaurant);
-        }
-
-
-        private bool RestaurantExists(int id)
-        {
-            return db.Restaurant.Count(e => e.id == id) > 0;
         }
     }
 }
