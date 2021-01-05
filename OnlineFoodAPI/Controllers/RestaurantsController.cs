@@ -74,37 +74,27 @@ namespace OnlineFoodAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            try
-            {
-                // Will be null if not found
-                Restaurant UpdatedRestaurant = db.Restaurant.Find(restaurantIn.id);
 
-                if (UpdatedRestaurant == null) 
-                {
-                    // If null, restaurant does not exist
-                    return NotFound();
-                }
+             // Will be null if not found
+             Restaurant UpdatedRestaurant = db.Restaurant.Find(restaurantIn.id);
 
-                // This method updates the same way the old did
-                UpdatedRestaurant.name = restaurantIn.name;
-                UpdatedRestaurant.city = restaurantIn.city;
-                UpdatedRestaurant.phonenumber = restaurantIn.phonenumber;
-                UpdatedRestaurant.User = restaurantIn.User;
-                UpdatedRestaurant.Dishes = restaurantIn.Dishes;
-                UpdatedRestaurant.delivery_price = restaurantIn.delivery_price;
-                UpdatedRestaurant.email = restaurantIn.email;
+             if (UpdatedRestaurant == null) 
+             {
+                 // If null, restaurant does not exist
+                 return NotFound();
+             }
 
-             
-                 // The code below caused errors when updating. Not sure why...  
-                 // db.Entry(restaurant).State = EntityState.Modified;
+            // This method updates the same way the old did
+            UpdatedRestaurant.name = restaurantIn.name;
+            UpdatedRestaurant.city = restaurantIn.city;
+            UpdatedRestaurant.phonenumber = restaurantIn.phonenumber;
+            UpdatedRestaurant.User = restaurantIn.User;
+            UpdatedRestaurant.Dishes = restaurantIn.Dishes;
+            UpdatedRestaurant.delivery_price = restaurantIn.delivery_price;
+            UpdatedRestaurant.email = restaurantIn.email;
 
-                db.SaveChanges();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                // Not sure how to get a catch here...
-                return NotFound();
-            }
+            db.SaveChanges();
+   
             return Ok(restaurantIn);
         }
 

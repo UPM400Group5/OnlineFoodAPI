@@ -132,24 +132,8 @@ namespace UnitTestAPI
         public void UpdateRestaurant_Successfully()
         {
 
-      
-            //  This is hardcoded. The other method broke when it came to this point
-         
-            
-            IHttpActionResult content = controller.GetRestaurant(929);
-            var contentResult = content as OkNegotiatedContentResult<Restaurant>;
 
-            Restaurant restaurant = contentResult.Content;
-
-            if (restaurant.city.ToLower() == "malmö") 
-            {
-                restaurant.city = "Trollhättan";
-            }
-            else 
-            {
-                restaurant.city = "Malmö";
-            }
-
+            restaurant.city = "Malmö";
             IHttpActionResult actionResult = controller.PutRestaurant(restaurant);
 
             // If ok, it succeded
