@@ -126,9 +126,59 @@ namespace OnlineFoodAPI.Controllers
 
             return "updated";
         }
+        [HttpPost]
+        [Route("dishes/addingredients/{dishid}/{userid}")]
+        public IHttpActionResult AddIngredientToDish(int dishid, int userid, Ingredient[] Ingredient)
+        {
+            User checkifadmin = db.User.Find(userid); //check if the user should be able to continue
+            Dishes dishes = db.Dishes.Find(dishid); //make an object of current.
+            if (checkifadmin.role != "admin")
+            {
+                return BadRequest("User is not a admin") ; //returns error if false.
+            }
+            if (dishid != dishes.id)
+            {
+                return BadRequest("id doesnt exist");
+            }
+            try
+            {
+                foreach (var item in Ingredient)
+                {
+                  Ingredient temping = db.Ingredient.Where(e => e.name == item.name).FirstOrDefault();
+                   if(temping == null)
+                    {
+                        db.Ingredient.Add(item);
+                        db.SaveChanges();
+                        temping = db.Ingredient.Where(e => e.name == item.name).FirstOrDefault();
+                    }
+
+                    item.id = temping.id;
+                }
+            }
+            catch (Exception e)
+            {
+                return BadRequest("Could not find or add ingredient");
+            }
+
+
+            //adding to list
+            List<DishesIngredient> tempdishinglist = new List<DishesIngredient>();
+                //db.DishesIngredient.Where(e => e.Dishes_id == dishid).ToList();
+            foreach(var item in Ingredient)
+            {
+                DishesIngredient tempdish = new DishesIngredient() { Dishes_id = dishid, Ingredient_id = item.id };
+                tempdishinglist.Add(tempdish);
+            }
+            foreach(var item in tempdishinglist)
+            {
+                db.DishesIngredient.Add(item);
+                db.SaveChanges();
+            }
+            dishes = db.Dishes.Find(dishid);
+            return Ok(dishes);
+        }
+
         [Route("dishes/getspecificdish/{id}")]
-        // GET: specificDish by sending id
-        [ResponseType(typeof(Dishes))]
         public IHttpActionResult GetDishes(int id)
         {
             Dishes dishes = db.Dishes.Find(id); //make an object of the dishid sent in.
@@ -148,6 +198,7 @@ namespace OnlineFoodAPI.Controllers
             }
             dishes.Ingredient = temping;
             dishes.DishesIngredient = null;  //make them null to not send it recursive data
+
 
             return Ok(dishes);
         }
@@ -174,6 +225,8 @@ namespace OnlineFoodAPI.Controllers
             }
             return totalprice.ToString();
         }
+
+       
 
         [HttpPost]
         [Route("dishes/NewDish/{userid}")] //Todo: maybe check if the dish belongs to the restaurant that wants to change
