@@ -186,6 +186,7 @@
     <Compile Include="Controllers\RestaurantsController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Models\DatabaseFoodOnlineEntityModel.cs" />
+    <Compile Include="Models\DishAndIngredient.cs" />
     <Compile Include="Models\Dishes.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
