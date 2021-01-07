@@ -6,6 +6,7 @@ using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Description;
 using OnlineFoodAPI;
@@ -31,17 +32,24 @@ namespace OnlineFoodAPI.Controllers
                     List<DishesIngredient> ingredientlist = db.DishesIngredient.Where(e => e.Dishes_id == item.id).ToList(); //find every dish that has an id connected to each dish from dbo.DishesIngredient
                     foreach (var item2 in ingredientlist)
                     {
+
                         Ingredient ingridienttemp = db.Ingredient.Find(item2.Ingredient_id); //find each ingredient to make an object out of it.
-                        ingridienttemp.Dishes = null; //so the data isnt recursive
-                        ingridienttemp.DishesIngredient = null; //so the data isnt recursive
                         temping.Add(ingridienttemp); //add ingredient to list 
                     }
+                    var test = temping.Count();
                     item.Ingredient = temping; //specify that each ingredient associated to the Dish(item) is an object.
                     item.DishesIngredient = null;  //so the data isnt recursive  
-
                 }
             }
             catch (Exception e) { }
+            foreach(var item in alldishes)
+            {
+                foreach(var item2 in item.Ingredient)
+                {
+                    item2.Dishes = null;
+                    item2.DishesIngredient = null;
+                }
+            }
             return alldishes;
         }
 
@@ -136,7 +144,7 @@ namespace OnlineFoodAPI.Controllers
             {
                 return BadRequest("User is not a admin") ; //returns error if false.
             }
-            if (dishid != dishes.id)
+            if (dishes == null)
             {
                 return BadRequest("id doesnt exist");
             }
@@ -144,26 +152,34 @@ namespace OnlineFoodAPI.Controllers
             {
                 foreach (var item in Ingredient)
                 {
-                  Ingredient temping = db.Ingredient.Where(e => e.name == item.name).FirstOrDefault();
-                   if(temping == null)
+                    
+                    Ingredient temping = db.Ingredient.Where(e => e.name == item.name).FirstOrDefault();
+                    Ingredient ing_id = new Ingredient();
+                    Ingredient tryingtoadd = new Ingredient();
+                    if (temping == null)
                     {
-                        db.Ingredient.Add(item);
+                        tryingtoadd.name = item.name;
+                        tryingtoadd.id = 0;
+                        db.Ingredient.Add(tryingtoadd);
                         db.SaveChanges();
-                        temping = db.Ingredient.Where(e => e.name == item.name).FirstOrDefault();
+                        ing_id = db.Ingredient.Where(e => e.name == tryingtoadd.name).FirstOrDefault();
+                        item.id = ing_id.id;
+                    }
+                    else
+                    {
+                        item.id = temping.id;
                     }
 
-                    item.id = temping.id;
                 }
             }
             catch (Exception e)
             {
-                return BadRequest("Could not find or add ingredient");
+                return BadRequest("Could not find or add ingredient" + e) ;
             }
 
 
             //adding to list
             List<DishesIngredient> tempdishinglist = new List<DishesIngredient>();
-                //db.DishesIngredient.Where(e => e.Dishes_id == dishid).ToList();
             foreach(var item in Ingredient)
             {
                 DishesIngredient tempdish = new DishesIngredient() { Dishes_id = dishid, Ingredient_id = item.id };

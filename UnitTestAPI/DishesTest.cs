@@ -96,10 +96,30 @@ namespace UnitTestAPI
         public void GetDishes_ReturnOkHttp()
         {
             var dishesnull = controller.GetDishes(2);
-            Assert.IsInstanceOf<System.Web.Http.Results.NotFoundResult>(dishesnull);
+            Assert.IsInstanceOf<NotFoundResult>(dishesnull);
             var returnok = controller.GetDishes(item.id);
             Assert.IsInstanceOf<OkNegotiatedContentResult<Dishes>>(returnok);
 
+        }
+
+        [Test]
+        public void AddIngredientToDish_CheckadminandIdWrong()
+        {
+            Ingredient[] ingredientArray = GetIngredients().ToArray();
+            var usernotadmin = controller.AddIngredientToDish(item.id, 1, ingredientArray);
+            Assert.IsInstanceOf<BadRequestErrorMessageResult>(usernotadmin, "User is not a admin");
+
+            var Iddoesntextst = controller.AddIngredientToDish(1, 2, ingredientArray);
+            Assert.IsInstanceOf<BadRequestErrorMessageResult>(Iddoesntextst, "id doesnt exist");
+
+        }
+
+        [Test]
+        public void AddIngredientToDish_ReturnOkHttp()
+        {
+            Ingredient[] ingredientArray = GetIngredients().ToArray();
+            var Sucessadd = controller.AddIngredientToDish(item.id, 2, ingredientArray);
+            Assert.IsInstanceOf<Dishes[]>(Sucessadd);
         }
 
         [Test]
@@ -159,6 +179,14 @@ namespace UnitTestAPI
             ingredient[2] = new Ingredient() { name = "ost" };
             dish.Ingredient = ingredient;
             return dish;
+        }
+        public Ingredient[] GetIngredients()
+        {
+            Ingredient[] ingredient = new Ingredient[3];
+            ingredient[0] = new Ingredient() { name = "tomatsås" };
+            ingredient[1] = new Ingredient() { name = "PepperoniUppdaterat" };
+            ingredient[2] = new Ingredient() { name = "ostUppdaterat" };
+            return ingredient;
         }
     }
 }
