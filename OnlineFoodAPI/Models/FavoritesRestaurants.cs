@@ -1,12 +1,16 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Web;
+
 
 namespace OnlineFoodAPI.Models
 {
-    [Table("FavoritesRestaurants")]
+    [DataContract(IsReference = true)]
+    [Serializable()]
     public class FavoritesRestaurants
     {
         [ForeignKey("User")]

@@ -47,7 +47,6 @@ namespace OnlineFoodAPI.Controllers
                 foreach(var item2 in item.Ingredient)
                 {
                     item2.Dishes = null;
-                    item2.DishesIngredient = null;
                 }
             }
             return alldishes;

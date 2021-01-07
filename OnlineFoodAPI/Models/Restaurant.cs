@@ -1,13 +1,17 @@
 namespace OnlineFoodAPI
 {
+    using Newtonsoft.Json;
     using OnlineFoodAPI.Models;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Data.Entity.Spatial;
+    using System.Runtime.Serialization;
 
     [Table("Restaurant")]
+    [DataContract(IsReference = true)]
+    [JsonObject(IsReference = false)]
     public partial class Restaurant
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
