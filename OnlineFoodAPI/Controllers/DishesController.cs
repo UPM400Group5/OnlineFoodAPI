@@ -180,24 +180,18 @@ namespace OnlineFoodAPI.Controllers
             {
                 foreach (var item in Ingredient)
                 {
-                    
-                    Ingredient temping = db.Ingredient.Where(e => e.name == item.name).FirstOrDefault();
-                    Ingredient ing_id = new Ingredient();
-                    Ingredient tryingtoadd = new Ingredient();
-                    if (temping == null)
+                    // Check the database for ingredient by name. If null, add it to database
+                    bool ingredientExists = (db.Ingredient.Where(x => x.name.ToLower() == item.name.ToLower()).FirstOrDefault() != null);
+
+                   // add the ingredient in the database if null
+                    if (!ingredientExists)
                     {
-                        tryingtoadd.name = item.name;
-                        tryingtoadd.id = 0;
-                        db.Ingredient.Add(tryingtoadd);
+                        db.Ingredient.Add(new Ingredient { name = item.name });
                         db.SaveChanges();
-                        ing_id = db.Ingredient.Where(e => e.name == tryingtoadd.name).FirstOrDefault();
-                        item.id = ing_id.id;
-                    }
-                    else
-                    {
-                        item.id = temping.id;
                     }
 
+                    // Assign the id of the ingredient in the array regardless of true or false
+                    item.id = db.Ingredient.Where(x => x.name.ToLower() == item.name.ToLower()).FirstOrDefault().id;
                 }
             }
             catch (Exception e)
@@ -205,20 +199,19 @@ namespace OnlineFoodAPI.Controllers
                 return BadRequest("Could not find or add ingredient" + e) ;
             }
 
-
-            //adding to list
-            List<DishesIngredient> tempdishinglist = new List<DishesIngredient>();
             foreach(var item in Ingredient)
             {
-                DishesIngredient tempdish = new DishesIngredient() { Dishes_id = dishid, Ingredient_id = item.id };
-                tempdishinglist.Add(tempdish);
+                bool exists = db.DishesIngredient.Where(x => x.Dishes_id == dishid && x.Ingredient_id == item.id) != null;
+                
+                // if table row with these dishes and ingredients already exists, do not add
+                if (!exists) 
+                {
+                    db.DishesIngredient.Add(new DishesIngredient { Dishes_id = dishid, Ingredient_id = item.id });
+                    db.SaveChanges();
+                }
+              
             }
-            foreach(var item in tempdishinglist)
-            {
-                db.DishesIngredient.Add(item);
-                db.SaveChanges();
-            }
-            dishes = db.Dishes.Find(dishid);
+
             return Ok(dishes);
         }
 

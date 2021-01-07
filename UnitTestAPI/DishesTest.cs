@@ -117,10 +117,9 @@ namespace UnitTestAPI
         [Test]
         public void AddIngredientToDish_ReturnOkHttp()
         {
-            //TODO: krånglar
             Ingredient[] ingredientArray = GetIngredients().ToArray();
             var Sucessadd = controller.AddIngredientToDish(item.id, 2, ingredientArray);
-            Assert.IsInstanceOf<Dishes[]>(Sucessadd);
+            Assert.IsInstanceOf<OkNegotiatedContentResult<Dishes>>(Sucessadd);
         }
 
         [Test]
