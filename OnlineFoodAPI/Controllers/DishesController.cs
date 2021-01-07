@@ -32,22 +32,53 @@ namespace OnlineFoodAPI.Controllers
 
                 foreach (var item in (db.DishesIngredient.ToList()))
                 {
-
                     if (item.Dishes_id == dishItem.id)
                     {
                         var stuff = (db.Ingredient.Find(item.Ingredient_id));
-
                         tempList.Add((new IngredientModel { id = stuff.id, name = stuff.name }));
                     }
                 }
-
+                
                 dish.ingredients = tempList;
                 alldishes.Add(dish);
             }
-
+         
             return alldishes;
         }
-        
+
+        //FOR UNIT TEST ONLY
+        public List<Dishes> GetDishesOld()
+        {
+            List<Dishes> alldishes = db.Dishes.ToList();
+            try
+            {
+                foreach (var item in alldishes) //make sure ingredient exist as an object.
+                {
+                    List<Ingredient> temping = new List<Ingredient>();
+                    List<DishesIngredient> ingredientlist = db.DishesIngredient.Where(e => e.Dishes_id == item.id).ToList(); //find every dish that has an id connected to each dish from dbo.DishesIngredient
+                    foreach (var item2 in ingredientlist)
+                    {
+
+                        Ingredient ingridienttemp = db.Ingredient.Find(item2.Ingredient_id); //find each ingredient to make an object out of it.
+                        temping.Add(ingridienttemp); //add ingredient to list 
+                    }
+                    var test = temping.Count();
+                    item.Ingredient = temping; //specify that each ingredient associated to the Dish(item) is an object.
+                    item.DishesIngredient = null;  //so the data isnt recursive  
+                }
+            }
+            catch (Exception e) { }
+            foreach (var item in alldishes)
+            {
+                foreach (var item2 in item.Ingredient)
+                {
+                    item2.Dishes = null;
+                }
+            }
+            return alldishes;
+        }
+
+
         [HttpPut]
         [Route("dishes/update/{id}/{userid}")]
         public string PutDishess(int id, int userid, Dishes dishes)

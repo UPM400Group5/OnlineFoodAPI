@@ -22,7 +22,7 @@ namespace UnitTestAPI
             item = GetDemoDish();
             var result =
                 controller.PostDishes(item, userid);
-            List<Dishes> listing = controller.GetDishes().ToList();
+            List<Dishes> listing = controller.GetDishesOld().ToList();
             var dishes = listing[listing.Count() - 1];
             item.id = dishes.id;
             
@@ -51,8 +51,8 @@ namespace UnitTestAPI
         [Test]
         public void GetDishes_ReturnListOfDishes()
         {
-            List<Dishes> tempdish = controller.GetDishes();
-            Assert.IsInstanceOf<List<Dishes>>(tempdish);
+            List<OnlineFoodAPI.Models.Dish> tempdish = controller.GetDishes();
+            Assert.IsInstanceOf<List<OnlineFoodAPI.Models.Dish>>(tempdish);
         }
 
         [Test]
@@ -117,9 +117,17 @@ namespace UnitTestAPI
         [Test]
         public void AddIngredientToDish_ReturnOkHttp()
         {
+            //TODO: krånglar
             Ingredient[] ingredientArray = GetIngredients().ToArray();
             var Sucessadd = controller.AddIngredientToDish(item.id, 2, ingredientArray);
             Assert.IsInstanceOf<Dishes[]>(Sucessadd);
+        }
+
+        [Test]
+        public void GetDishes_NotNull()
+        {
+            // New 
+            Assert.IsNotNull(controller.GetDishes());
         }
 
         [Test]
