@@ -21,13 +21,7 @@ namespace OnlineFoodAPI.Controllers
         [Route("restaurant/all")]
         public List<Restaurant> GetRestaurant()
         {
-            List<Restaurant> restList = db.Restaurant.ToList(); //adds all restaurangs 
-            foreach(var item in restList)
-            {
-                item.Dishes = db.Dishes.Where(e => e.Restaurant_id == item.id).ToList();
-
-            }
-            return restList;
+            return db.Restaurant.ToList();
         }
 
         [Route("restaurant/specific/{id}")]
@@ -53,18 +47,18 @@ namespace OnlineFoodAPI.Controllers
             List<FavoritesRestaurants> FavoriteRestaurants = db.FavoritesRestaurants.Where(uid => uid.User_id == userid).ToList(); //see all favourite restraurants the user has.
             if (FavoriteRestaurants.Count != 0) //see so the list has objects in it
             {
-                foreach (var item in FavoriteRestaurants) 
+                foreach (var item in FavoriteRestaurants)
                 {
                     Restaurant restaurant = new Restaurant();
                     temprestaurants.Add(db.Restaurant.Where(fr => fr.id == item.Restaurant_id).FirstOrDefault()); //add restaurant id 
                 }
             }
-            foreach(var item in temprestaurants)
+            foreach (var item in temprestaurants)
             {
                 item.User = null; //so that the data isnt recursive
                 item.FavoritesRestaurants = null; //so that the data isnt recursive
                 List<Dishes> tempdish = db.Dishes.Where(e => e.Restaurant_id == item.id).ToList(); // Adds the restaurant.dishes so frontend can use it directly
-                item.Dishes = tempdish; 
+                item.Dishes = tempdish;
                 restaurants.Add(item); //adds the object to the list ready for return
             }
             return restaurants;
@@ -73,35 +67,38 @@ namespace OnlineFoodAPI.Controllers
         [HttpPut]
         [Route("restaurant/update")]
         [ResponseType(typeof(void))]
-        public IHttpActionResult PutRestaurant(Restaurant restaurant) //sends in object in body
+        public IHttpActionResult PutRestaurant(Restaurant restaurantIn) //sends in object in body
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            db.Entry(restaurant).State = EntityState.Modified;
 
-            try
+            // Will be null if not found
+            Restaurant UpdatedRestaurant = db.Restaurant.Find(restaurantIn.id);
+
+            if (UpdatedRestaurant == null)
             {
-                db.SaveChanges();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!RestaurantExists(restaurant.id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                // If null, restaurant does not exist
+                return NotFound();
             }
 
-            return StatusCode(HttpStatusCode.OK);
+            // This method updates the same way the old did
+            UpdatedRestaurant.name = restaurantIn.name;
+            UpdatedRestaurant.city = restaurantIn.city;
+            UpdatedRestaurant.phonenumber = restaurantIn.phonenumber;
+            UpdatedRestaurant.User = restaurantIn.User;
+            UpdatedRestaurant.Dishes = restaurantIn.Dishes;
+            UpdatedRestaurant.delivery_price = restaurantIn.delivery_price;
+            UpdatedRestaurant.email = restaurantIn.email;
+
+            db.SaveChanges();
+
+            return Ok(restaurantIn);
         }
 
-        [HttpPost] 
+        [HttpPost]
         [Route("restaurant/new")]
         [ResponseType(typeof(Restaurant))]
         public IHttpActionResult PostRestaurant(Restaurant restaurant) //works but should send an affirmative if the action goes through instead of error on postman?
@@ -114,7 +111,7 @@ namespace OnlineFoodAPI.Controllers
             db.Restaurant.Add(restaurant);
             db.SaveChanges();
 
-            return CreatedAtRoute("DefaultApi", new { id = restaurant.id }, restaurant);
+            return Ok("Created restaurant! " + restaurant.name);
         }
 
         /// <summary>
@@ -138,10 +135,11 @@ namespace OnlineFoodAPI.Controllers
         [Route("restaurant/dishes/{id}")]
         public List<Dishes> GetRestaurantDishes(int id)
         {
-            return db.Dishes.Where(x => x.Restaurant_id == id).ToList(); 
+            return db.Dishes.Where(x => x.Restaurant_id == id).ToList();
         }
 
-        // DELETE: api/Restaurants/5
+        [HttpDelete]
+        [Route("restaurant/{id}")]
         [ResponseType(typeof(Restaurant))]
         public IHttpActionResult DeleteRestaurant(int id)
         {
@@ -150,25 +148,16 @@ namespace OnlineFoodAPI.Controllers
             {
                 return NotFound();
             }
+            List<FavoritesRestaurants> restlist = db.FavoritesRestaurants.Where(e => e.Restaurant_id == id).ToList(); //removes each restaurant from db so no foreign keys are left.
+            foreach (var item in restlist)
+            {
+                db.FavoritesRestaurants.Remove(item);
+            }
 
             db.Restaurant.Remove(restaurant);
             db.SaveChanges();
 
             return Ok(restaurant);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
-        private bool RestaurantExists(int id)
-        {
-            return db.Restaurant.Count(e => e.id == id) > 0;
         }
     }
 }

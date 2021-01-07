@@ -11,10 +11,12 @@ namespace OnlineFoodAPI.Models
     {
         [ForeignKey("Dishes")]
         public int Dishes_id { get; set; }
+        [ForeignKey("Ingredient")]
         public Dishes Dishes { get; set; }
 
         [ForeignKey("Ingredient")]
         public int Ingredient_id { get; set; }
+        [ForeignKey("Ingredient")]
         public Ingredient Ingredient { get; set; }
     }
 

@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
 using OnlineFoodAPI;
+using OnlineFoodAPI.Models;
 
 namespace OnlineFoodAPI.Controllers
 {
@@ -52,27 +53,13 @@ namespace OnlineFoodAPI.Controllers
             }
 
             Ingredient temping = db.Ingredient.Where(e => e.name == ingredient.name).FirstOrDefault(); //searches dbo.ingredient to see if the ingredient already exist
-            if(temping == null) 
+            if(temping != null) 
             {
                 return BadRequest("That ingredient already exists");  //error message if it exist
             }
 
             db.Entry(ingredient).State = EntityState.Modified; //tells db what to modify
-            try
-            {
-                db.SaveChanges();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!IngredientExists(ingredient.id)) //if the ingredient doesnt extist in the current dbo, error
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            db.SaveChanges();
 
             return StatusCode(HttpStatusCode.NoContent);
         }
@@ -108,6 +95,11 @@ namespace OnlineFoodAPI.Controllers
             {
                 return NotFound();
             }
+            List<DishesIngredient> dishesingred = db.DishesIngredient.Where(e => e.Ingredient_id == id).ToList();
+            foreach (var item in dishesingred) 
+            {
+                db.DishesIngredient.Remove(item);
+            }
 
             db.Ingredient.Remove(ingredient); //remove ingredient from db
             db.SaveChanges();
@@ -115,17 +107,5 @@ namespace OnlineFoodAPI.Controllers
             return Ok(ingredient);
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-        private bool IngredientExists(int id)
-        {
-            return db.Ingredient.Count(e => e.id == id) > 0;
-        }
     }
 }
