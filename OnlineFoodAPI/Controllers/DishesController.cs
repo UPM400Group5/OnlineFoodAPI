@@ -24,13 +24,15 @@ namespace OnlineFoodAPI.Controllers
         public List<Dish> GetDishes()
         {
             List<Dish> alldishes = new List<Dish>();
-
+            var ingridientlist = db.DishesIngredient.ToList();
+            
             foreach (var dishItem in (db.Dishes.ToList()))
             {
                 Dish dish = new Dish(dishItem);
-                List<IngredientModel> tempList = new List<IngredientModel>();
 
-                foreach (var item in (db.DishesIngredient.ToList()))
+                List<IngredientModel> tempList = new List<IngredientModel>();
+                
+                foreach (var item in ingridientlist)
                 {
                     if (item.Dishes_id == dishItem.id)
                     {
