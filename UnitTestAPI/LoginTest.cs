@@ -1,42 +1,42 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using NUnit.Framework;
 using OnlineFoodAPI.Models;
 using System.Linq;
+using OnlineFoodAPI.Controllers;
+using OnlineFoodAPI;
 
 namespace UnitTestAPI
 {
-    [TestClass]
     public class LoginTest
     {
-        [TestMethod]
-        public void FailedLogin()
+        [Test]
+        public void FailedLogin_ReturnsNull()
         {
-            using (OnlineFoodDatabaseModel db = new OnlineFoodDatabaseModel())
-            {
-                LoginModel model = new LoginModel();
-                model.password = "123456";
-                model.username = "Admin";
+            var controller = new LoginController();
 
-                var result = db.User.Where(x => x.username == model.username && x.password == model.password).FirstOrDefault();
+            var login = GetWrongUserLogin();
 
-                // Should be null if failed
-                Assert.IsNull(result);
-            }
+            var result = controller.LoginUser(login);
+
+            Assert.IsNull(result);
         }
 
-        [TestMethod]
-        public void SuccessfulLogin()
+        [Test]
+        public void SuccessfulLogin_ReturnsModelNotNull()
         {
-            using (OnlineFoodDatabaseModel db = new OnlineFoodDatabaseModel())
-            {
-                LoginModel model = new LoginModel();
-                model.password = "123456";
-                model.username = "potionseller";
+            var controller = new LoginController();
+            var login = GetRightUserLogin();
+            
+            var result = controller.LoginUser(login);
 
-                var result = db.User.Where(x => x.username == model.username && x.password == model.password).FirstOrDefault();
-
-                // An object of user is returned if successfull, if not then it failed
-                Assert.IsNotNull(result);
-            }
+            Assert.IsNotNull(result);
+        }
+        LoginModel GetWrongUserLogin()
+        {
+            return new LoginModel() {username = "mockeduser", password = "123456" };
+        }
+        LoginModel GetRightUserLogin()
+        {
+            return new LoginModel() { username = "potionseller", password = "123456" };
         }
     }
 }

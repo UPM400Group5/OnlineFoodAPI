@@ -18,7 +18,7 @@ namespace OnlineFoodAPI
         public virtual DbSet<Restaurant> Restaurant { get; set; }
         public virtual DbSet<User> User { get; set; }
         public DbSet<FavoritesRestaurants> FavoritesRestaurants { get; set; }
-        public DbSet<DishesIngredient> DishesIngredient { get; set; }
+        public virtual DbSet<DishesIngredient> DishesIngredient { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -28,7 +28,7 @@ namespace OnlineFoodAPI
 
             modelBuilder.Entity<DishesIngredient>()
                 .HasKey(k => new { k.Dishes_id, k.Ingredient_id })
-                .ToTable("DishesIngredient");
+                .Map(m => m.ToTable("DishesIngredient"));
 
 
             /*modelBuilder.Entity<FavoritesRestaurants>()

@@ -52,19 +52,19 @@ namespace OnlineFoodAPI.Controllers
         [ResponseType(typeof(void))]
         public IHttpActionResult PutUser(int id, User user) //id is from header of api, user is sent from body
         {
-            user = db.User.Find(id); //find user from id
+            //user = db.User.Find(id); //find user from id
             if (!ModelState.IsValid) //check if the model is valid
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != user.id) //se if sent id is the same as user. If user is null you wont be sent past.
+            if (id != user.id) //see if sent id is the same as user
             {
                 return BadRequest("Cant find user");
             }
 
             // If password length is less than 6, dont continue
-            if (user.password.Length <= 6) 
+            if (user.password.Length < 6) 
             {
                 return BadRequest("Password length is less than 6");
             }
@@ -75,7 +75,7 @@ namespace OnlineFoodAPI.Controllers
             {
                 db.SaveChanges();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException e)
             {
                 if (!UserExists(id)) //if user doesnt exist with the id
                 {
@@ -86,7 +86,7 @@ namespace OnlineFoodAPI.Controllers
                     throw;
                 }
             }
-            return StatusCode(HttpStatusCode.NoContent);
+            return Ok("user updated");
         }
 
 
@@ -100,7 +100,7 @@ namespace OnlineFoodAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (user.password.Length <= 6)  //check if password length is less than 6
+            if (user.password.Length < 6)  //check if password length is less than 6
             {
                 return BadRequest("Password length is less than 6");
             }
@@ -108,7 +108,7 @@ namespace OnlineFoodAPI.Controllers
             db.User.Add(user); //add user to db
             db.SaveChanges();
 
-            return CreatedAtRoute("DefaultApi", new { id = user.id }, user);
+            return Ok(user);
         }
 
         #region FAVOURITE RESTAURANTS
@@ -116,13 +116,14 @@ namespace OnlineFoodAPI.Controllers
         [Route("Users/addfavrest/{userid}/{restid}")]
         public string AddFavRest(int userid, int restid) //Ad, with GET, Favourite restaurant to db. Since user sho uld only press an icon to add.
         {
-            User user = db.User.Find(userid); //find user with logged in userid sent through header of api
-            var Restaurant = db.Restaurant.Find(restid); //find restaurant with restaurantID sent through header of api
-            FavoritesRestaurants favoritesRestaurant = new FavoritesRestaurants(); //specify the new favouriterestaurant with an object to send to dbo.FavouriteRestaurant
-            favoritesRestaurant.Restaurant_id = Restaurant.id;
-            favoritesRestaurant.User_id = user.id;
             try
             {
+                User user = db.User.Find(userid); //find user with logged in userid sent through header of api
+                var Restaurant = db.Restaurant.Find(restid); //find restaurant with restaurantID sent through header of api
+                FavoritesRestaurants favoritesRestaurant = new FavoritesRestaurants(); //specify the new favouriterestaurant with an object to send to dbo.FavouriteRestaurant
+                favoritesRestaurant.Restaurant_id = Restaurant.id;
+                favoritesRestaurant.User_id = user.id;
+
                 db.FavoritesRestaurants.Add(favoritesRestaurant); //add to db
                 db.SaveChanges();
                 return "Success";
@@ -134,20 +135,23 @@ namespace OnlineFoodAPI.Controllers
         }
 
         [HttpDelete]
-        [Route("Users/Removefavrest/{userid}/{restid}")]   //Removes favrestauarant - Tested and works
+        [Route("Users/Removefavrest/{userid}/{restid}")]  
         public string RemoveFavRest(int userid, int restid) //only from header of api since the user should only press a button to 'unsubscribe'
         {
-            User user = db.User.Find(userid); //find user in dbo.User with userid from header of api
-            var Restaurant = db.Restaurant.Find(restid); //find restaurant from dbo.restaurants with restid from header of api
-            if (Restaurant == null) //if restaurant cant be found
-            {
-                return "could not find the restaurant";
-            }
-            FavoritesRestaurants favoritesRestaurant = new FavoritesRestaurants();  //make an object out of the data we found
-            favoritesRestaurant.Restaurant_id = Restaurant.id; 
-            favoritesRestaurant.User_id = user.id;
+          
             try
             {
+                var Restaurant = db.Restaurant.Find(restid);
+
+                
+
+                // If restaurant does not exist
+                if (Restaurant == null)
+                {
+                    return "could not find the restaurant";
+                }
+                FavoritesRestaurants favoritesRestaurant = db.FavoritesRestaurants.Where(x => x.Restaurant_id == restid && x.User_id == userid).FirstOrDefault();
+
                 db.FavoritesRestaurants.Attach(favoritesRestaurant); //telling db what kind of object to delete
                 db.Entry(favoritesRestaurant).State = EntityState.Deleted;  //db deletes it
                 db.SaveChanges(); //save db
@@ -171,6 +175,7 @@ namespace OnlineFoodAPI.Controllers
             {
                 return NotFound();
             }
+            // User that is being deleted could be connected to FavoriteRestaurants table
             List<FavoritesRestaurants> templist = db.FavoritesRestaurants.Where(e => e.User_id == user.id).ToList(); //have to remove foreign key restraints in dbo.FavouriteRestaurant
             foreach(var item in templist)
             {
@@ -183,20 +188,10 @@ namespace OnlineFoodAPI.Controllers
             return Ok(user);
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
 
         private bool UserExists(int id)
         {
             return db.User.Count(e => e.id == id) > 0;
-        }
-
-        
+        }   
     }
 }

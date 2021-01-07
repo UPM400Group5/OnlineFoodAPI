@@ -1,157 +1,193 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
-using UnitTestAPI.Models;
+using OnlineFoodAPI;
+using OnlineFoodAPI.Controllers;
+using System.Web.Http;
+using System.Web.Http.Results;
+using System.Net;
 
 namespace UnitTestAPI
 {
-    [TestClass]
     public class RestaurantsTest
     {
-        [TestMethod]
-        public void AddRestaurant()
+        Restaurant restaurant;
+        RestaurantsController controller = new RestaurantsController();
+
+        //User user;
+        //UsersController userController = new UsersController();
+
+        [SetUp]
+        public void Setup()
         {
-            bool succeded = false;
-            using (OnlineFoodDatabaseModel db = new OnlineFoodDatabaseModel())
-            {
-                // Will create a new object
-                Restaurant restaurant = new Restaurant { 
-                    name = "MaxUnitTest", 
-                    adress = "Storgatan 43", 
-                    city = "Trollhättan", 
-                    delivery_price = 65, 
-                    email = "Max@gmail.com", 
-                    phonenumber = "34556352342" 
-                };
-  
-                try
-                {
-                    db.Restaurant.Add(restaurant);
-                    db.SaveChanges();
-                    succeded = true; // if database gives no error, it works
-                }
-                catch { }
-
-                // If true, it works
-                Assert.IsTrue(succeded);
-           
-            }
-        }
-        [TestMethod]
-        public void UpdateRestaurant()
-        {
-            bool succeded = false;
-
-            using (OnlineFoodDatabaseModel db = new OnlineFoodDatabaseModel())
-            {
-                Restaurant restaurant = new Restaurant
-                {
-                    id = 3,
-                    name = "MaxUnitTest",
-                    adress = "Storgatan 43",
-                    city = "Göteborg",
-                    delivery_price = 65,
-                    email = "Max@gmail.com",
-                    phonenumber = "34556352342"
-                };
-
-                try
-                {
-                    db.Entry(restaurant).State = EntityState.Modified;
-                    db.SaveChanges();
-                    succeded = true;
-                }
-                catch { }
-
-                Assert.IsTrue(succeded);
-            }
-                
-        }
-
-        [TestMethod]
-        public void DeleteRestaurant()
-        {
-            bool succeded = false;
-
             try
             {
-                using (OnlineFoodDatabaseModel db = new OnlineFoodDatabaseModel())
-                {
-                    // Unit test code... The row beneath just finds an id to use in the actual code that is used in API project
-                    int id = db.Restaurant.Where(x => x.name == "MaxUnitTest").FirstOrDefault().id;
-
-                    // Code logic used in API project below:
-                    Restaurant restaurant = db.Restaurant.Find(id);
-
-                    db.Restaurant.Remove(restaurant);
-                    db.SaveChanges();
-                    succeded = true;
-                }
+                restaurant = GetNewMockupRestaurant();
+                var result = controller.PostRestaurant(restaurant);
+                List<Restaurant> listRestaurant = controller.GetRestaurant();
+                var tempRestaurant = listRestaurant[(listRestaurant.Count() - 1)];
+                restaurant.id = tempRestaurant.id;
             }
-            catch { }
-            Assert.IsTrue(succeded);
-        }
-        [TestMethod]
-        public void RestaurantSorted()
-        {
-            using (OnlineFoodDatabaseModel db = new OnlineFoodDatabaseModel())
+            catch (Exception e)
             {
-                string city = "göteborg";
-                var result = db.Restaurant.Where(x => x.city.ToLower() == city.ToLower()).ToList();
 
-                // Result should not be null
-                Assert.AreNotEqual(null, result);
             }
         }
-        [TestMethod]
-        public void GetRestaurantDishesByRestaurantId()
+
+        [TearDown]
+        public void Teardown()
         {
-            using (OnlineFoodDatabaseModel db = new OnlineFoodDatabaseModel())
+            try
             {
-                int id = 1;
-                var result = db.Dishes.Where(x => x.Restaurant_id == id).ToList();
-
-                Assert.IsNotNull(result);
+                controller.ModelState.Clear();
+                var result =
+                    controller.DeleteRestaurant(restaurant.id);
             }
+            catch (Exception e)
+            {
+
+            }         
         }
-        [TestMethod]
-        public void GetFavoriteRestaurantsByUserId()
+
+        #region Create
+        [Test]
+        public void PostRestaurant_BadRequest()
         {
-            using (OnlineFoodDatabaseModel db = new OnlineFoodDatabaseModel())
-            {
-                int id = 1;
+            Restaurant temp = GetNoneExistingRestaurant();
+            controller.ModelState.AddModelError("test", "test");
 
-                List<Restaurant> temprestaurants = new List<Restaurant>();
-                List<Restaurant> restaurants = new List<Restaurant>();
-                List<FavoritesRestaurants> FavoriteRestaurants = db.FavoritesRestaurants.Where(uid => uid.User_id == id).ToList();
-                if (FavoriteRestaurants.Count != 0)
-                {
-                    foreach (var item in FavoriteRestaurants)
-                    {
-                        Restaurant restaurant = new Restaurant();
-                        temprestaurants.Add(db.Restaurant.Where(fr => fr.id == item.Restaurant_id).FirstOrDefault());
-                    }
-                }
-
-                foreach (var item in temprestaurants)
-                {
-                    Restaurant restaurant = new Restaurant();
-                    restaurant.id = item.id;
-                    restaurant.name = item.name;
-                    restaurant.adress = item.adress;
-                    restaurant.city = item.city;
-                    restaurant.delivery_price = item.delivery_price;
-                    restaurant.email = item.email;
-                    restaurant.phonenumber = item.phonenumber;
-                    // restaurant.Dishes= item.Dishes;
-                    restaurants.Add(restaurant);
-                }
-
-                Assert.IsNotNull(restaurants);
-            }
+            IHttpActionResult actionResult = controller.PostRestaurant(temp);
+            Assert.IsInstanceOf<InvalidModelStateResult>(actionResult);
         }
 
+        [Test]
+        public void PostRestaurant_Successfully()
+        {
+
+            IHttpActionResult actionResult = controller.PostRestaurant(restaurant);
+            controller.DeleteRestaurant(restaurant.id);
+            Assert.IsInstanceOf<OkNegotiatedContentResult<string>>(actionResult);
+        }
+        #endregion
+
+        #region Read
+        [Test]
+        public void GetRestaurauntById_Successfully()
+        {
+            IHttpActionResult actionResult = controller.GetRestaurant(1);
+            Assert.IsInstanceOf<OkNegotiatedContentResult<Restaurant>>(actionResult);
+        }
+
+        [Test]
+        public void GetRestaurauntById_NotFound()
+        {
+            IHttpActionResult actionResult = controller.GetRestaurant(Int32.MaxValue);
+            Assert.IsInstanceOf<NotFoundResult>(actionResult);
+        }
+
+        [Test]
+        public void GetRestaurantList_Successfully()
+        {
+            var list = controller.GetRestaurant();
+            Assert.IsTrue(list != null);
+        }
+
+        [Test]
+        public void GetFavouriteRestaurant_Successfully()
+        {
+            // Get list
+            UsersController controllerUser = new UsersController();
+            var newfavrestaurant = controllerUser.AddFavRest(1, 2);
+            var list = controller.GetFavouriteRestaurant(1);
+            Assert.IsNotNull(list);
+        }
+
+        [Test]
+        public void GetSortedCities_Successfully()
+        {
+            string city = "Göteborg";
+            var list = controller.GetSortedCity("Göteborg");
+
+            int total = list.Count;
+
+            // Count each by city
+            int byCity = (list.Where(x => x.city.ToLower() == city.ToLower())).ToList().Count;
+
+            Assert.AreEqual(byCity, total);
+        }
+
+        [Test]
+        public void GetRestaurantDishes_Successfully()
+        {
+            //TODO: hardcoded
+            var list = controller.GetRestaurantDishes(1);
+            Assert.IsNotNull(list);
+        }
+        #endregion
+
+        #region Update
+        [Test]
+        public void UpdateRestaurant_Successfully()
+        {
+
+
+            restaurant.city = "Malmö";
+            IHttpActionResult actionResult = controller.PutRestaurant(restaurant);
+
+            // If ok, it succeded
+            Assert.IsInstanceOf<OkNegotiatedContentResult<Restaurant>>(actionResult);
+        }
+        [Test]
+        public void UpdateRestaurant_NotFound()
+        {
+            Restaurant temp = GetNoneExistingRestaurant();
+            IHttpActionResult actionResult = controller.PutRestaurant(temp);
+
+            Assert.IsInstanceOf<NotFoundResult>(actionResult);
+        }
+        [Test]
+        public void UpdateRestaurant_BadRequest()
+        {
+            restaurant.city = "Malmö";
+            controller.ModelState.AddModelError("test", "test");
+
+            IHttpActionResult actionResult = controller.PutRestaurant(restaurant);
+            Assert.IsInstanceOf<InvalidModelStateResult>(actionResult);
+        }
+        #endregion
+
+        #region Delete
+        [Test]
+        public void DeleteRestaurant_Successfully()
+        {
+            UsersController Usercontroller = new UsersController();
+            Usercontroller.AddFavRest(2, restaurant.id);
+            IHttpActionResult actionResult = controller.DeleteRestaurant(restaurant.id);
+            Assert.IsInstanceOf<OkNegotiatedContentResult<Restaurant>>(actionResult);
+        }
+        [Test]
+        public void DeleteRestaurant_NotFound()
+        {
+            IHttpActionResult actionResult = controller.DeleteRestaurant(Int32.MaxValue);
+            Assert.IsInstanceOf<NotFoundResult>(actionResult);
+        }
+        #endregion
+
+        #region Mockup data
+        private Restaurant GetNewMockupRestaurant()
+        {
+            return new Restaurant() { name = "Nilssons Pizzeria", city = "Trollhättan", adress = "Hamngatan 23", delivery_price = 10, email = "Nilssons@yahoo.se", phonenumber = "13123441" };
+        }
+        private Restaurant GetNoneExistingRestaurant()
+        {
+            return new Restaurant() { name = "Alberts Bageri", city = "Malmö", adress = "Drottninggatan 23", delivery_price = 10, email = "Nilssons@yahoo.se", phonenumber = "13123441", id = Int32.MaxValue };
+        }
+        private User GetNewMockupUser()
+        {
+            return new User() { username = "UnitTestUser123456", password = "123456", role = "user" };
+        }
+        #endregion
     }
 }
