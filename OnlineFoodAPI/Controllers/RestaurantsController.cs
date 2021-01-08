@@ -21,7 +21,15 @@ namespace OnlineFoodAPI.Controllers
         [Route("restaurant/all")]
         public List<Restaurant> GetRestaurant()
         {
-            return db.Restaurant.ToList();
+            List<Restaurant> restaurants = db.Restaurant.ToList();
+            List<Dishes> dishes = db.Dishes.ToList();
+            foreach(Restaurant item in restaurants)
+            {
+
+            }
+            return restaurants;
+
+            
         }
 
         [Route("restaurant/specific/{id}")]
@@ -33,8 +41,44 @@ namespace OnlineFoodAPI.Controllers
             {
                 return NotFound();
             }
-            restaurant.Dishes = db.Dishes.Where(e => e.Restaurant_id == restaurant.id).ToList();
 
+
+            restaurant.Dishes = db.Dishes.Where(e => e.Restaurant_id == restaurant.id).ToList();
+            List<Ingredient> listingtemp = db.Ingredient.ToList();
+            foreach(var item in restaurant.Dishes)
+            {
+                List<Ingredient> dishingredins = new List<Ingredient>();
+                List<DishesIngredient> dishesinglist = db.DishesIngredient.Where(e => e.Dishes_id == item.id).ToList();
+                foreach(var item2 in dishesinglist)
+                {
+                    List<Ingredient> ing = listingtemp.Where(e => e.id == item2.Ingredient_id).ToList();
+                    foreach(var item3 in ing)
+                    {
+                        item3.DishesIngredient = null;
+                        dishingredins.Add(item3);   
+                    }
+
+                }
+                item.Ingredient = dishingredins;
+
+            }
+            restaurant.User = null;
+            restaurant.FavoritesRestaurants = null;
+            foreach(var item in restaurant.Dishes)
+            {
+                item.DishesIngredient = null;
+                List<Ingredient> newinglist = new List<Ingredient>();
+                foreach(var item2 in item.Ingredient)
+                {
+                    Ingredient new123 = new Ingredient();
+                    new123.name = item2.name;
+                    newinglist.Add(new123);
+                }
+                item.Ingredient = newinglist;
+                item.User = null;
+                item.Restaurant = null;
+            }
+            
             return Ok(restaurant);
         }
 
