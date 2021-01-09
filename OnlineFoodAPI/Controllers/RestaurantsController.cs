@@ -22,11 +22,51 @@ namespace OnlineFoodAPI.Controllers
         public List<Restaurant> GetRestaurant()
         {
             List<Restaurant> restaurants = db.Restaurant.ToList();
-            List<Dishes> dishes = db.Dishes.ToList();
-            foreach(Restaurant item in restaurants)
+            foreach(var item in restaurants)
             {
+                item.Dishes = null;
+                item.User = null;
+                item.FavoritesRestaurants = null;
+                /* item.Dishes = db.Dishes.Where(e => e.Restaurant_id == item.id).ToList();
+                List<Ingredient> listingtemp = db.Ingredient.ToList();
+                foreach (var item2 in item.Dishes)
+                {
+                    List<Ingredient> dishingredins = new List<Ingredient>();
+                    List<DishesIngredient> dishesinglist = db.DishesIngredient.Where(e => e.Dishes_id == item2.id).ToList();
+                    foreach (var item3 in dishesinglist)
+                    {
+                        List<Ingredient> ing = listingtemp.Where(e => e.id == item3.Ingredient_id).ToList();
+                        foreach (var item4 in ing)
+                        {
+                            item4.DishesIngredient = null;
+                            dishingredins.Add(item4);
+                        }
+
+                    }
+                    item2.Ingredient = dishingredins;
+
+                }
+                item.User = null;
+                item.FavoritesRestaurants = null;
+                foreach (var item2 in item.Dishes)
+                {
+                    item2.DishesIngredient = null;
+                    List<Ingredient> newinglist = new List<Ingredient>();
+                    foreach (var item3 in item2.Ingredient)
+                    {
+                        Ingredient new123 = new Ingredient();
+                        new123.name = item3.name;
+                        newinglist.Add(new123);
+                    }
+                    item2.Ingredient = newinglist;
+                    item2.User = null;
+                    item2.Restaurant = null; 
+
+            }*/
 
             }
+
+
             return restaurants;
 
             

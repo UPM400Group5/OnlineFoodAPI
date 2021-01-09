@@ -6,8 +6,6 @@ using System.Web;
 
 namespace OnlineFoodAPI.Models
 {
-    [DataContract(IsReference = false)]
-    [Serializable()]
     // This model is meant for the get api. password is removed
     public class UserModel
     {

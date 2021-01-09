@@ -1,5 +1,6 @@
 namespace OnlineFoodAPI
 {
+    using Newtonsoft.Json;
     using OnlineFoodAPI.Models;
     using System;
     using System.Collections.Generic;
@@ -9,8 +10,10 @@ namespace OnlineFoodAPI
     using System.Runtime.Serialization;
 
     [Table("User")]
-    [DataContract(IsReference = false)]
-    [Serializable()]
+    [DataContract(IsReference = true)]
+    [JsonObject(IsReference = false)]
+
+    //[Serializable()]
     public partial class User
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]

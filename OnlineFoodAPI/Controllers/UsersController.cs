@@ -29,7 +29,8 @@ namespace OnlineFoodAPI.Controllers
             // Check user by id, then check role and make it lowercase
             if (db.User.Find(id).role.ToLower() == "admin") 
             {
-                return db.User.ToList(); //return all user if the user is admin
+                List<User> users = db.User.ToList(); //return all user if the user is admin
+                return users;
             }
             return null;
         }
