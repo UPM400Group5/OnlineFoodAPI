@@ -66,8 +66,9 @@ namespace UnitTestAPI
         public void PostRestaurant_Successfully()
         {
 
-            IHttpActionResult actionResult = controller.PostRestaurant(restaurant);
-            controller.DeleteRestaurant(restaurant.id);
+
+            IHttpActionResult actionResult = controller.PostRestaurant(GetNewMockupRestaurant());
+            //controller.DeleteRestaurant(restaurant.id);
             Assert.IsInstanceOf<OkNegotiatedContentResult<string>>(actionResult);
         }
         #endregion
@@ -131,9 +132,9 @@ namespace UnitTestAPI
         [Test]
         public void UpdateRestaurant_Successfully()
         {
+         
 
-
-            restaurant.city = "Malmö";
+                restaurant.city = "Malmö";
             IHttpActionResult actionResult = controller.PutRestaurant(restaurant);
 
             // If ok, it succeded
