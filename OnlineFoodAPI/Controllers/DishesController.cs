@@ -36,7 +36,6 @@ namespace OnlineFoodAPI.Controllers
                         Ingredient ingridienttemp = db.Ingredient.Find(item2.Ingredient_id); //find each ingredient to make an object out of it.
                         temping.Add(ingridienttemp); //add ingredient to list 
                     }
-                    var test = temping.Count();
                     item.Ingredient = temping; //specify that each ingredient associated to the Dish(item) is an object.
                     item.DishesIngredient = null;  //so the data isnt recursive  
                 }
@@ -81,10 +80,11 @@ namespace OnlineFoodAPI.Controllers
             }
             else
             {
-                RemoveIngredients(tempdishing);
-                Dishes tempdish = db.Dishes.Find(dishes.id);
-                tempdish.Ingredient = null;
-                db.SaveChanges();
+                foreach(var item in tempdishing)
+                {
+                    db.DishesIngredient.Remove(item);
+                    db.SaveChanges();
+                }
             }
             try
             {
@@ -341,12 +341,15 @@ namespace OnlineFoodAPI.Controllers
             List<DishesIngredient> tempdishing = db.DishesIngredient.Where(e => e.Dishes_id == dishid).ToList(); //add all dishesingredient from dbo.dishesingredient that has dish_id as dishid sent in header
             if (tempdishing.Count != 0)
             {
-                foreach (DishesIngredient item in tempdishing) //each dishingredient in tempdishing list
+                List<DishesIngredient> dishesingredientlist = db.DishesIngredient.ToList();
+                foreach(var item in tempdishing)
                 {
+                    dishesingredientlist.Remove(item);
                     db.DishesIngredient.Remove(item); //removes all rows where item(dishingredient with dish_id == dishid) exists.
-
                 }
+                db.DishesIngredient.AddRange(dishesingredientlist);
             }
+
 
             try
             {
@@ -356,21 +359,6 @@ namespace OnlineFoodAPI.Controllers
             catch (Exception e) { }
 
             return Ok(dishes); //return the deleted dish
-        }
-        public void RemoveIngredients(List<DishesIngredient> tempdishing)
-        {
-            if (tempdishing.Count != 0)
-            {
-                foreach (DishesIngredient item in tempdishing) //each dishingredient in tempdishing list
-                {
-                    db.DishesIngredient.Remove(item); //removes all rows where item(dishingredient with dish_id == dishid) exists.
-
-                }
-
-
-            }
-
-
         }
 
     }

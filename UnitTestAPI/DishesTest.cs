@@ -40,12 +40,20 @@ namespace UnitTestAPI
                 IngredientsController controllerIng = new IngredientsController();
                 var result2 =
                     controllerIng.GetIngredient().ToList();
+
                 Ingredient temping = result2.Find(e=>e.name == "testpepperoni");
-                controllerIng.DeleteIngredient(temping.id, userid);
+                if(temping != null)
+                {
+                    controllerIng.DeleteIngredient(temping.id, userid);
+                }
+
                 temping = result2.Find(e => e.name == "ost");
-                controllerIng.DeleteIngredient(temping.id, userid);
+                if(temping != null)
+                {
+                    controllerIng.DeleteIngredient(temping.id, userid);
+                }
             }
-            catch { }
+            catch(Exception e) { }
         }
 
         [Test]
