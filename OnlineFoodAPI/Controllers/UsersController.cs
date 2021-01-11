@@ -58,7 +58,7 @@ namespace OnlineFoodAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
-
+            
             if (id != user.id) //see if sent id is the same as user
             {
                 return BadRequest("Cant find user");
