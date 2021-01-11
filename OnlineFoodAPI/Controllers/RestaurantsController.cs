@@ -21,7 +21,15 @@ namespace OnlineFoodAPI.Controllers
         [Route("restaurant/all")]
         public List<Restaurant> GetRestaurant()
         {
-            return db.Restaurant.ToList();
+            List<Restaurant> restaurants = db.Restaurant.ToList();
+            foreach(var item in restaurants)
+            {
+                item.Dishes = null;
+                item.User = null;
+                item.FavoritesRestaurants = null;
+            }
+
+            return restaurants;
         }
 
         [Route("restaurant/specific/{id}")]
@@ -33,8 +41,44 @@ namespace OnlineFoodAPI.Controllers
             {
                 return NotFound();
             }
-            restaurant.Dishes = db.Dishes.Where(e => e.Restaurant_id == restaurant.id).ToList();
 
+
+            restaurant.Dishes = db.Dishes.Where(e => e.Restaurant_id == restaurant.id).ToList();
+            List<Ingredient> listingtemp = db.Ingredient.ToList();
+            foreach(var item in restaurant.Dishes)
+            {
+                List<Ingredient> dishingredins = new List<Ingredient>();
+                List<DishesIngredient> dishesinglist = db.DishesIngredient.Where(e => e.Dishes_id == item.id).ToList();
+                foreach(var item2 in dishesinglist)
+                {
+                    List<Ingredient> ing = listingtemp.Where(e => e.id == item2.Ingredient_id).ToList();
+                    foreach(var item3 in ing)
+                    {
+                        item3.DishesIngredient = null;
+                        dishingredins.Add(item3);   
+                    }
+
+                }
+                item.Ingredient = dishingredins;
+
+            }
+            restaurant.User = null;
+            restaurant.FavoritesRestaurants = null;
+            foreach(var item in restaurant.Dishes)
+            {
+                item.DishesIngredient = null;
+                List<Ingredient> newinglist = new List<Ingredient>();
+                foreach(var item2 in item.Ingredient)
+                {
+                    Ingredient new123 = new Ingredient();
+                    new123.name = item2.name;
+                    newinglist.Add(new123);
+                }
+                item.Ingredient = newinglist;
+                item.User = null;
+                item.Restaurant = null;
+            }
+            
             return Ok(restaurant);
         }
 
@@ -69,33 +113,36 @@ namespace OnlineFoodAPI.Controllers
         [ResponseType(typeof(void))]
         public IHttpActionResult PutRestaurant(Restaurant restaurantIn) //sends in object in body
         {
-            if (!ModelState.IsValid)
+            using (DatabaseFoodOnlineEntityModel database = new DatabaseFoodOnlineEntityModel())
             {
-                return BadRequest(ModelState);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+    
+    
+                // Will be null if not found
+                Restaurant UpdatedRestaurant = db.Restaurant.Find(restaurantIn.id);
+    
+                if (UpdatedRestaurant == null)
+                {
+                    // If null, restaurant does not exist
+                    return NotFound();
+                }
+    
+                // This method updates the same way the old did
+                UpdatedRestaurant.name = restaurantIn.name;
+                UpdatedRestaurant.city = restaurantIn.city;
+                UpdatedRestaurant.phonenumber = restaurantIn.phonenumber;
+                UpdatedRestaurant.User = restaurantIn.User;
+                UpdatedRestaurant.Dishes = restaurantIn.Dishes;
+                UpdatedRestaurant.delivery_price = restaurantIn.delivery_price;
+                UpdatedRestaurant.email = restaurantIn.email;
+
+                database.SaveChanges();
+    
+                return Ok(restaurantIn);
             }
-
-
-            // Will be null if not found
-            Restaurant UpdatedRestaurant = db.Restaurant.Find(restaurantIn.id);
-
-            if (UpdatedRestaurant == null)
-            {
-                // If null, restaurant does not exist
-                return NotFound();
-            }
-
-            // This method updates the same way the old did
-            UpdatedRestaurant.name = restaurantIn.name;
-            UpdatedRestaurant.city = restaurantIn.city;
-            UpdatedRestaurant.phonenumber = restaurantIn.phonenumber;
-            UpdatedRestaurant.User = restaurantIn.User;
-            UpdatedRestaurant.Dishes = restaurantIn.Dishes;
-            UpdatedRestaurant.delivery_price = restaurantIn.delivery_price;
-            UpdatedRestaurant.email = restaurantIn.email;
-
-            db.SaveChanges();
-
-            return Ok(restaurantIn);
         }
 
         [HttpPost]
@@ -103,15 +150,18 @@ namespace OnlineFoodAPI.Controllers
         [ResponseType(typeof(Restaurant))]
         public IHttpActionResult PostRestaurant(Restaurant restaurant) //works but should send an affirmative if the action goes through instead of error on postman?
         {
-            if (!ModelState.IsValid)
+            using (DatabaseFoodOnlineEntityModel database = new DatabaseFoodOnlineEntityModel()) 
             {
-                return BadRequest(ModelState);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                database.Restaurant.Add(restaurant);
+                database.SaveChanges();
+
+                return Ok("Created restaurant! " + restaurant.name);
             }
-
-            db.Restaurant.Add(restaurant);
-            db.SaveChanges();
-
-            return Ok("Created restaurant! " + restaurant.name);
         }
 
         /// <summary>
@@ -143,21 +193,21 @@ namespace OnlineFoodAPI.Controllers
         [ResponseType(typeof(Restaurant))]
         public IHttpActionResult DeleteRestaurant(int id)
         {
-            Restaurant restaurant = db.Restaurant.Find(id);
-            if (restaurant == null)
-            {
-                return NotFound();
-            }
-            List<FavoritesRestaurants> restlist = db.FavoritesRestaurants.Where(e => e.Restaurant_id == id).ToList(); //removes each restaurant from db so no foreign keys are left.
-            foreach (var item in restlist)
-            {
-                db.FavoritesRestaurants.Remove(item);
-            }
+                Restaurant restaurant = db.Restaurant.Find(id);
+                if (restaurant == null)
+                {
+                    return NotFound();
+                }
+                List<FavoritesRestaurants> restlist = db.FavoritesRestaurants.Where(e => e.Restaurant_id == id).ToList(); //removes each restaurant from db so no foreign keys are left.
+                foreach (var item in restlist)
+                {
+                    db.FavoritesRestaurants.Remove(item);
+                }
 
-            db.Restaurant.Remove(restaurant);
-            db.SaveChanges();
+                db.Restaurant.Remove(restaurant);
+                db.SaveChanges();
 
-            return Ok(restaurant);
+                return Ok(restaurant);
         }
     }
 }

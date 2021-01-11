@@ -137,60 +137,63 @@ namespace OnlineFoodAPI.Controllers
         [Route("dishes/addingredients/{dishid}/{userid}")]
         public IHttpActionResult AddIngredientToDish(int dishid, int userid, Ingredient[] Ingredient)
         {
-            User checkifadmin = db.User.Find(userid); //check if the user should be able to continue
-            Dishes dishes = db.Dishes.Find(dishid); //make an object of current.
-            if (checkifadmin.role != "admin")
+            using (DatabaseFoodOnlineEntityModel database = new DatabaseFoodOnlineEntityModel())
             {
-                return BadRequest("User is not a admin") ; //returns error if false.
-            }
-            if (dishes == null)
-            {
-                return BadRequest("id doesnt exist");
-            }
-            try
-            {
+                User checkifadmin = database.User.Find(userid); //check if the user should be able to continue
+                Dishes dishes = database.Dishes.Find(dishid); //make an object of current.
+                if (checkifadmin.role != "admin")
+                {
+                    return BadRequest("User is not a admin"); //returns error if false.
+                }
+                if (dishes == null)
+                {
+                    return BadRequest("id doesnt exist");
+                }
+                try
+                {
+                    foreach (var item in Ingredient)
+                    {
+
+                        Ingredient temping = database.Ingredient.Where(e => e.name == item.name).FirstOrDefault();
+                        Ingredient ing_id = new Ingredient();
+                        Ingredient tryingtoadd = new Ingredient();
+                        if (temping == null)
+                        {
+                            tryingtoadd.name = item.name;
+                            tryingtoadd.id = 0;
+                            database.Ingredient.Add(tryingtoadd);
+                            database.SaveChanges();
+                            ing_id = database.Ingredient.Where(e => e.name == tryingtoadd.name).FirstOrDefault();
+                            item.id = ing_id.id;
+                        }
+                        else
+                        {
+                            item.id = temping.id;
+                        }
+
+                    }
+                }
+                catch (Exception e)
+                {
+                    return BadRequest("Could not find or add ingredient" + e);
+                }
+
+
+                //adding to list
+                List<DishesIngredient> tempdishinglist = new List<DishesIngredient>();
                 foreach (var item in Ingredient)
                 {
-                    
-                    Ingredient temping = db.Ingredient.Where(e => e.name == item.name).FirstOrDefault();
-                    Ingredient ing_id = new Ingredient();
-                    Ingredient tryingtoadd = new Ingredient();
-                    if (temping == null)
-                    {
-                        tryingtoadd.name = item.name;
-                        tryingtoadd.id = 0;
-                        db.Ingredient.Add(tryingtoadd);
-                        db.SaveChanges();
-                        ing_id = db.Ingredient.Where(e => e.name == tryingtoadd.name).FirstOrDefault();
-                        item.id = ing_id.id;
-                    }
-                    else
-                    {
-                        item.id = temping.id;
-                    }
-
+                    DishesIngredient tempdish = new DishesIngredient() { Dishes_id = dishid, Ingredient_id = item.id };
+                    tempdishinglist.Add(tempdish);
                 }
+                foreach (var item in tempdishinglist)
+                {
+                    database.DishesIngredient.Add(item);
+                    database.SaveChanges();
+                }
+                dishes = database.Dishes.Find(dishid);
+                return Ok(dishes);
             }
-            catch (Exception e)
-            {
-                return BadRequest("Could not find or add ingredient" + e) ;
-            }
-
-
-            //adding to list
-            List<DishesIngredient> tempdishinglist = new List<DishesIngredient>();
-            foreach(var item in Ingredient)
-            {
-                DishesIngredient tempdish = new DishesIngredient() { Dishes_id = dishid, Ingredient_id = item.id };
-                tempdishinglist.Add(tempdish);
-            }
-            foreach(var item in tempdishinglist)
-            {
-                db.DishesIngredient.Add(item);
-                db.SaveChanges();
-            }
-            dishes = db.Dishes.Find(dishid);
-            return Ok(dishes);
         }
 
         [Route("dishes/getspecificdish/{id}")]
