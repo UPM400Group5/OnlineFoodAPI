@@ -36,7 +36,6 @@ namespace OnlineFoodAPI.Controllers
                         Ingredient ingridienttemp = db.Ingredient.Find(item2.Ingredient_id); //find each ingredient to make an object out of it.
                         temping.Add(ingridienttemp); //add ingredient to list 
                     }
-                    var test = temping.Count();
                     item.Ingredient = temping; //specify that each ingredient associated to the Dish(item) is an object.
                     item.DishesIngredient = null;  //so the data isnt recursive  
                 }
@@ -81,10 +80,17 @@ namespace OnlineFoodAPI.Controllers
             }
             else
             {
-                RemoveIngredients(tempdishing);
-                Dishes tempdish = db.Dishes.Find(dishes.id);
-                tempdish.Ingredient = null;
-                db.SaveChanges();
+                db.DishesIngredient.RemoveRange(tempdishing);
+                try
+                {
+                    db.SaveChanges();
+                }
+                catch (Exception e)
+                {
+
+                }
+               tempdishing = db.DishesIngredient.Where(e => e.Dishes_id == id).ToList(); //add all dishesingredient from dbo.dishesingredient that has dish_id as dishid sent in header
+
             }
             try
             {
@@ -126,6 +132,7 @@ namespace OnlineFoodAPI.Controllers
             activityinDb.Restaurant_id = dishes.Restaurant_id;
             activityinDb.Restaurant = db.Restaurant.Find(dishes.Restaurant_id); //restaurang is an object so we search for the id in dbo.restaurang
             activityinDb.specialprice = dishes.specialprice;
+            activityinDb.DishesIngredient = null;
             db.Entry(activityinDb).State = EntityState.Modified;  //Db knows what to update.
 
 
@@ -137,40 +144,46 @@ namespace OnlineFoodAPI.Controllers
         [Route("dishes/addingredients/{dishid}/{userid}")]
         public IHttpActionResult AddIngredientToDish(int dishid, int userid, Ingredient[] Ingredient)
         {
+            User checkifadmin = db.User.Find(userid); //check if the user should be able to continue
+            Dishes dishes = db.Dishes.Find(dishid); //make an object of current.
+                
+            if (checkifadmin.role != "admin")
+            {
+                return BadRequest("User is not a admin"); //returns error if false.
+            }
+            if (dishes == null)
+            {
+                return BadRequest("id doesnt exist");
+            }
+
             using (DatabaseFoodOnlineEntityModel database = new DatabaseFoodOnlineEntityModel())
             {
-                User checkifadmin = database.User.Find(userid); //check if the user should be able to continue
-                Dishes dishes = database.Dishes.Find(dishid); //make an object of current.
-                if (checkifadmin.role != "admin")
-                {
-                    return BadRequest("User is not a admin"); //returns error if false.
-                }
-                if (dishes == null)
-                {
-                    return BadRequest("id doesnt exist");
-                }
                 try
                 {
                     foreach (var item in Ingredient)
                     {
+                        int tempId;
+                        var ingredientExists = database.Ingredient.Where(x => x.name.ToLower() == item.name.ToLower()).FirstOrDefault();
 
-                        Ingredient temping = database.Ingredient.Where(e => e.name == item.name).FirstOrDefault();
-                        Ingredient ing_id = new Ingredient();
-                        Ingredient tryingtoadd = new Ingredient();
-                        if (temping == null)
+                        // Item does not, add to table and get id
+                        if (ingredientExists == null)
                         {
-                            tryingtoadd.name = item.name;
-                            tryingtoadd.id = 0;
-                            database.Ingredient.Add(tryingtoadd);
+                            Ingredient temp = new Ingredient { name = item.name };
+                            database.Ingredient.Add(temp);
                             database.SaveChanges();
-                            ing_id = database.Ingredient.Where(e => e.name == tryingtoadd.name).FirstOrDefault();
-                            item.id = ing_id.id;
+
+                            tempId = database.Ingredient.Where(x => x.name.ToLower() == item.name.ToLower()).FirstOrDefault().id;
                         }
                         else
                         {
-                            item.id = temping.id;
+                            // Item exists, assign the id
+                            tempId = ingredientExists.id;
                         }
 
+                        // Add to foreign key table
+                        DishesIngredient tempForeignRelation = new DishesIngredient { Dishes_id = dishes.id, Ingredient_id = tempId };
+                        database.DishesIngredient.Add(tempForeignRelation);
+                        database.SaveChanges();
                     }
                 }
                 catch (Exception e)
@@ -178,22 +191,11 @@ namespace OnlineFoodAPI.Controllers
                     return BadRequest("Could not find or add ingredient" + e);
                 }
 
-
-                //adding to list
-                List<DishesIngredient> tempdishinglist = new List<DishesIngredient>();
-                foreach (var item in Ingredient)
-                {
-                    DishesIngredient tempdish = new DishesIngredient() { Dishes_id = dishid, Ingredient_id = item.id };
-                    tempdishinglist.Add(tempdish);
-                }
-                foreach (var item in tempdishinglist)
-                {
-                    database.DishesIngredient.Add(item);
-                    database.SaveChanges();
-                }
                 dishes = database.Dishes.Find(dishid);
-                return Ok(dishes);
             }
+           
+
+            return Ok(dishes);
         }
 
         [Route("dishes/getspecificdish/{id}")]
@@ -341,12 +343,15 @@ namespace OnlineFoodAPI.Controllers
             List<DishesIngredient> tempdishing = db.DishesIngredient.Where(e => e.Dishes_id == dishid).ToList(); //add all dishesingredient from dbo.dishesingredient that has dish_id as dishid sent in header
             if (tempdishing.Count != 0)
             {
-                foreach (DishesIngredient item in tempdishing) //each dishingredient in tempdishing list
+                List<DishesIngredient> dishesingredientlist = db.DishesIngredient.ToList();
+                foreach(var item in tempdishing)
                 {
+                    dishesingredientlist.Remove(item);
                     db.DishesIngredient.Remove(item); //removes all rows where item(dishingredient with dish_id == dishid) exists.
-
                 }
+                db.DishesIngredient.AddRange(dishesingredientlist);
             }
+
 
             try
             {
@@ -356,21 +361,6 @@ namespace OnlineFoodAPI.Controllers
             catch (Exception e) { }
 
             return Ok(dishes); //return the deleted dish
-        }
-        public void RemoveIngredients(List<DishesIngredient> tempdishing)
-        {
-            if (tempdishing.Count != 0)
-            {
-                foreach (DishesIngredient item in tempdishing) //each dishingredient in tempdishing list
-                {
-                    db.DishesIngredient.Remove(item); //removes all rows where item(dishingredient with dish_id == dishid) exists.
-
-                }
-
-
-            }
-
-
         }
 
     }

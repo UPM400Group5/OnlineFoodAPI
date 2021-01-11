@@ -13,7 +13,7 @@ namespace OnlineFoodAPI
     [DataContract(IsReference = true)]
     [JsonObject(IsReference = false)]
 
-    public partial class Ingredient
+    public class Ingredient
     {
 
         public Ingredient()
