@@ -186,7 +186,10 @@ namespace OnlineFoodAPI.Controllers
             }
             foreach(var item in tempdishinglist)
             {
-                db.DishesIngredient.Add(item);
+                DishesIngredient disingtoadd = new DishesIngredient();
+                disingtoadd.Dishes_id = item.Dishes_id;
+                disingtoadd.Ingredient_id = item.Ingredient_id;
+                db.DishesIngredient.Add(disingtoadd);
                 db.SaveChanges();
             }
             dishes = db.Dishes.Find(dishid);

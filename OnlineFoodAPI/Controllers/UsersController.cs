@@ -24,7 +24,7 @@ namespace OnlineFoodAPI.Controllers
         /// Get all data from users, send in current userID. Should only be allowed as admin
         /// </summary>
         [ResponseType(typeof(List<UserModel>))]
-        public List<User> GetAllUsers(int id)
+        public List<User> GetAllUsers([FromUri]int id)
         {
             // Check user by id, then check role and make it lowercase
             if (db.User.Find(id).role.ToLower() == "admin") 
