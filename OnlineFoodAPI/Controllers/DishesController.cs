@@ -139,60 +139,55 @@ namespace OnlineFoodAPI.Controllers
         {
             User checkifadmin = db.User.Find(userid); //check if the user should be able to continue
             Dishes dishes = db.Dishes.Find(dishid); //make an object of current.
+                
             if (checkifadmin.role != "admin")
             {
-                return BadRequest("User is not a admin") ; //returns error if false.
+                return BadRequest("User is not a admin"); //returns error if false.
             }
             if (dishes == null)
             {
                 return BadRequest("id doesnt exist");
             }
-            try
+
+            using (DatabaseFoodOnlineEntityModel database = new DatabaseFoodOnlineEntityModel())
             {
-                foreach (var item in Ingredient)
+                try
                 {
-                    
-                    Ingredient temping = db.Ingredient.Where(e => e.name == item.name).FirstOrDefault();
-                    Ingredient ing_id = new Ingredient();
-                    Ingredient tryingtoadd = new Ingredient();
-                    if (temping == null)
+                    foreach (var item in Ingredient)
                     {
-                        tryingtoadd.name = item.name;
-                        tryingtoadd.id = 0;
-                        db.Ingredient.Add(tryingtoadd);
-                        db.SaveChanges();
-                        ing_id = db.Ingredient.Where(e => e.name == tryingtoadd.name).FirstOrDefault();
-                        item.id = ing_id.id;
-                    }
-                    else
-                    {
-                        item.id = temping.id;
-                    }
+                        int tempId;
+                        var ingredientExists = database.Ingredient.Where(x => x.name.ToLower() == item.name.ToLower()).FirstOrDefault();
 
+                        // Item does not, add to table and get id
+                        if (ingredientExists == null)
+                        {
+                            Ingredient temp = new Ingredient { name = item.name };
+                            database.Ingredient.Add(temp);
+                            database.SaveChanges();
+
+                            tempId = database.Ingredient.Where(x => x.name.ToLower() == item.name.ToLower()).FirstOrDefault().id;
+                        }
+                        else
+                        {
+                            // Item exists, assign the id
+                            tempId = ingredientExists.id;
+                        }
+
+                        // Add to foreign key table
+                        DishesIngredient tempForeignRelation = new DishesIngredient { Dishes_id = dishes.id, Ingredient_id = tempId };
+                        database.DishesIngredient.Add(tempForeignRelation);
+                        database.SaveChanges();
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-                return BadRequest("Could not find or add ingredient" + e) ;
-            }
+                catch (Exception e)
+                {
+                    return BadRequest("Could not find or add ingredient" + e);
+                }
 
+                dishes = database.Dishes.Find(dishid);
+            }
+           
 
-            //adding to list
-            List<DishesIngredient> tempdishinglist = new List<DishesIngredient>();
-            foreach(var item in Ingredient)
-            {
-                DishesIngredient tempdish = new DishesIngredient() { Dishes_id = dishid, Ingredient_id = item.id };
-                tempdishinglist.Add(tempdish);
-            }
-            foreach(var item in tempdishinglist)
-            {
-                DishesIngredient disingtoadd = new DishesIngredient();
-                disingtoadd.Dishes_id = item.Dishes_id;
-                disingtoadd.Ingredient_id = item.Ingredient_id;
-                db.DishesIngredient.Add(disingtoadd);
-                db.SaveChanges();
-            }
-            dishes = db.Dishes.Find(dishid);
             return Ok(dishes);
         }
 
