@@ -11,7 +11,7 @@ namespace OnlineFoodAPI
 
     [DataContract(IsReference = true)]
     [JsonObject(IsReference = false)]
-    public partial class Dishes
+    public class Dishes
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Dishes()

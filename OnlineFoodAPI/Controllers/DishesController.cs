@@ -80,11 +80,17 @@ namespace OnlineFoodAPI.Controllers
             }
             else
             {
-                foreach(var item in tempdishing)
+                db.DishesIngredient.RemoveRange(tempdishing);
+                try
                 {
-                    db.DishesIngredient.Remove(item);
                     db.SaveChanges();
                 }
+                catch (Exception e)
+                {
+
+                }
+               tempdishing = db.DishesIngredient.Where(e => e.Dishes_id == id).ToList(); //add all dishesingredient from dbo.dishesingredient that has dish_id as dishid sent in header
+
             }
             try
             {
@@ -126,6 +132,7 @@ namespace OnlineFoodAPI.Controllers
             activityinDb.Restaurant_id = dishes.Restaurant_id;
             activityinDb.Restaurant = db.Restaurant.Find(dishes.Restaurant_id); //restaurang is an object so we search for the id in dbo.restaurang
             activityinDb.specialprice = dishes.specialprice;
+            activityinDb.DishesIngredient = null;
             db.Entry(activityinDb).State = EntityState.Modified;  //Db knows what to update.
 
 
